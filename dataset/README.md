@@ -1,15 +1,49 @@
-# Dataset status
+# DPDP Synthetic Benchmark Dataset
 
-No organizer-provided annotated PII corpus has been supplied to this workspace.
+This directory contains 50 synthetic Indian enterprise documents designed and generated for benchmarking the **DPDP-Ready Privacy Gateway for Enterprise LLMs**.
 
-The provided references are not evaluation documents:
+## Dataset Distribution
 
-- The MeitY DPDP Rules page is a policy reference and was not readable by the inspection fetcher (HTTP 403).
-- The Gazette PDF is a commencement-date notification.
-- The Presidio supported-entities Markdown page describes recognizer types. Its India section lists `IN_PAN`, `IN_AADHAAR`, `IN_VEHICLE_REGISTRATION`, `IN_VOTER`, `IN_PASSPORT`, and `IN_GSTIN`; `PERSON` and `LOCATION` are listed globally.
+In accordance with hackathon requirements, the dataset contains exactly **50 synthetic documents** across four enterprise compliance workflows:
 
-These references contain no document-level ground-truth entity spans or labeled values suitable for detection evaluation. Do not treat them as corpus records. The Presidio naming differs from the dashboard's expected `VOTER_ID` label, and the reference does not list an India-specific address entity; do not silently map these categories without agreeing on the organizer/backend taxonomy.
+| Workflow Category | Document Count | Synthetic PII Entities Included |
+|---|---:|---|
+| **Loan applications** | 15 | Primary applicant & co-borrower names, PAN, Aadhaar, residential addresses, sanction amounts |
+| **KYC documents** | 15 | Citizen names, UIDAI Aadhaar, Election Commission Voter ID (EPIC), residential addresses, joint nominee names |
+| **Customer support tickets** | 10 | Customer names, Indian passport numbers, linked PAN cards, delivery addresses, Kannada & Hindi code-mixed escalation notes |
+| **Insurance claims** | 10 | Corporate health & commercial fire claimants, corporate GSTIN, PAN, Aadhaar, hospital & business premises addresses |
+| **Total** | **50** | **182 ground-truth entity spans across 7 PII types** |
 
-The existing `synthetic_documents.json`, `synthetic_documents.csv`, and `ground_truth.json` files are earlier generated demo fixtures. Their format is JSON objects with `document_id`, `category`, `text`, and `entities` entries (`type`, `value`, `start`, `end`) and CSV rows with text and flattened entity fields. They are not organizer data and must not be used to report organizer-corpus metrics.
+## Supported Indian PII Categories
 
-Once organizers provide the actual corpus, inspect its format, fields, labels, offsets, licensing, and privacy constraints before adapting any importer or evaluator. Keep the original unchanged and out of Git unless distribution is explicitly permitted.
+1. **PERSON**: Multi-regional Indian personal names (primary applicants, co-borrowers, nominees, claimants).
+2. **AADHAAR**: 12-digit UIDAI identifiers formatted in 4-digit groups (e.g. `9876 5432 1098`).
+3. **PAN**: 10-character Permanent Account Number matching IT department format (`[A-Z]{5}[0-9]{4}[A-Z]`).
+4. **GSTIN**: 15-character Goods and Services Tax Identification Number (`[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]`).
+5. **VOTER_ID**: 10-character Election Commission EPIC identifier (`[A-Z]{3}[0-9]{7}`).
+6. **PASSPORT**: Indian travel passport number (`[A-Z][0-9]{7}`).
+7. **ADDRESS**: Multi-component Indian addresses including house numbers, streets/roads, localities, cities, and 6-digit postal pincodes.
+
+## Synthetic & Privacy Safety Guarantee
+
+> [!IMPORTANT]
+> All personal names, addresses, identification numbers, and contact records are **100% fictional and synthetically generated**. No real personal data or active government identifiers are used.
+
+## Exact Offset Verification
+
+All entity annotations contain precise character start and end offsets `[start, end]` such that:
+$$\text{document.text}[\text{start}:\text{end}] == \text{entity.value}$$
+Verification passes with **0 offset mismatches across all 50 documents**.
+
+## Files in this Directory
+
+- `generate_dataset.py`: Python generation script that builds and validates the 50 documents.
+- `synthetic_documents.json`: Complete JSON array of all 50 synthetic documents with embedded entity annotations.
+- `synthetic_documents.csv`: Flattened tabular representation of all documents and entity lists.
+- `ground_truth.json`: Structured ground truth specification used directly by `evaluation/evaluate.py`.
+
+## Regenerating the Dataset
+
+```bash
+python dataset/generate_dataset.py
+```

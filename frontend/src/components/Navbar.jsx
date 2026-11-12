@@ -10,6 +10,7 @@ export default function Navbar({ activePage, setSidebarOpen, sidebarOpen }) {
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 lg:hidden"
             onClick={() => setSidebarOpen((current) => !current)}
             aria-label="Toggle sidebar"
+            aria-expanded={sidebarOpen}
           >
             <Menu className="h-5 w-5 text-slate-200" />
           </button>
@@ -30,7 +31,7 @@ export default function Navbar({ activePage, setSidebarOpen, sidebarOpen }) {
             <Sparkles className="h-4 w-4 text-emerald-400" />
             {activePage}
           </div>
-          <button type="button" className="rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-slate-300">
+          <button type="button" className="rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-slate-300" aria-label="Notifications">
             <Bell className="h-4 w-4" />
           </button>
         </div>

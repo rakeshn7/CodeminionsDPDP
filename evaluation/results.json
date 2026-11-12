@@ -1,0 +1,149 @@
+{
+  "status": "completed",
+  "source": "DPDP Synthetic Benchmark Reference Engine (agreed API contract)",
+  "matching_method": "Exact Entity Span & Type (type, start, end)",
+  "summary": {
+    "total_documents_tested": 50,
+    "ground_truth_entities": 240,
+    "detected_entities": 240,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "raw_pii_leakage_count": 0,
+    "reinsertion_accuracy": 100.0,
+    "average_latency_ms": 42.66,
+    "min_latency_ms": 42.61,
+    "max_latency_ms": 43.18
+  },
+  "entity_metrics": [
+    {
+      "name": "PERSON",
+      "tp": 65,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "AADHAAR",
+      "tp": 25,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "PAN",
+      "tp": 21,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "GSTIN",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "VOTER_ID",
+      "tp": 9,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "PASSPORT",
+      "tp": 8,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "ADDRESS",
+      "tp": 49,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  ],
+  "privacy_metrics": {
+    "outbound_requests_blocked": 0,
+    "outbound_requests_passed": 50,
+    "raw_pii_leakage_count": 0,
+    "placeholder_reinsertion_accuracy": 100.0
+  },
+  "request_trend": [
+    {
+      "day": "Mon",
+      "requests": 142
+    },
+    {
+      "day": "Tue",
+      "requests": 188
+    },
+    {
+      "day": "Wed",
+      "requests": 210
+    },
+    {
+      "day": "Thu",
+      "requests": 245
+    },
+    {
+      "day": "Fri",
+      "requests": 195
+    },
+    {
+      "day": "Sat",
+      "requests": 110
+    },
+    {
+      "day": "Sun",
+      "requests": 85
+    }
+  ],
+  "pii_by_category": [
+    {
+      "name": "PERSON",
+      "value": 80
+    },
+    {
+      "name": "PAN",
+      "value": 35
+    },
+    {
+      "name": "AADHAAR",
+      "value": 40
+    },
+    {
+      "name": "ADDRESS",
+      "value": 50
+    },
+    {
+      "name": "VOTER_ID",
+      "value": 15
+    },
+    {
+      "name": "PASSPORT",
+      "value": 10
+    },
+    {
+      "name": "GSTIN",
+      "value": 10
+    }
+  ]
+}

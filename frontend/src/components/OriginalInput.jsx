@@ -10,7 +10,7 @@ export default function OriginalInput({ value, onChange, onClear, onSelectSample
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-slate-300">
           <FileText className="h-4 w-4 text-blue-300" />
-          Original Document
+          ORIGINAL DOCUMENT
         </div>
         <button
           type="button"

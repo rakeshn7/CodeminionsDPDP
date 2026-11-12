@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from fastapi.testclient import TestClient
 
 from app.audit.logger import AuditStore
@@ -7,12 +9,13 @@ from app.config import Settings
 from app.detection.india_recognizers import detect_india_patterns
 from app.detection.ner_engine import NERMatch
 from app.llm.base import LLMError, LLMProvider, LLMResult
+from app.llm.provider import GroqProvider
 from app.main import create_app
 from app.services.gateway import Gateway
 
 
 class StubProvider(LLMProvider):
-    name = "openai"
+    name = "groq"
     model = "test-model"
 
     def __init__(self, response: str = "Summary for <PERSON_1>.", fail: bool = False):
@@ -32,13 +35,14 @@ class StubProvider(LLMProvider):
 
 def _client(tmp_path, provider=None, audit_api_key=""):
     settings = Settings(
+        llm_provider="groq",
         database_url=f"sqlite:///{tmp_path / 'audit.db'}",
         enable_gliner=False,
         max_input_chars=100_000,
         audit_api_key=audit_api_key,
     )
     audit = AuditStore(settings.database_url)
-    gateway = Gateway(settings, audit, {"openai": provider or StubProvider()})
+    gateway = Gateway(settings, audit, {"groq": provider or StubProvider()})
     class TestDetector:
         def detect(self, text):
             names = ("Rahul Sharma", "Asha", "Ravi")
@@ -83,7 +87,7 @@ def test_process_masks_restores_and_audits_without_mapping(tmp_path):
     client, gateway, _ = _client(tmp_path, provider)
     response = client.post(
         "/api/process",
-        json={"text": "Rahul Sharma applied for a loan.", "provider": "openai"},
+        json={"text": "Rahul Sharma applied for a loan.", "provider": "groq"},
     )
     assert response.status_code == 200
     body = response.json()
@@ -127,9 +131,10 @@ def test_provider_failure_returns_clear_error_and_is_audited(tmp_path):
     assert records[0]["status"] == "failed"
 
 
-def test_real_provider_without_credentials_fails_without_fabricating_response(tmp_path):
+def test_groq_provider_without_credentials_fails_without_fabricating_response(tmp_path):
     settings = Settings(
-        openai_api_key="",
+        llm_provider="groq",
+        groq_api_key="",
         database_url=f"sqlite:///{tmp_path / 'audit.db'}",
         enable_gliner=False,
     )
@@ -137,8 +142,84 @@ def test_real_provider_without_credentials_fails_without_fabricating_response(tm
     client = TestClient(create_app(settings, Gateway(settings, audit)))
     response = client.post("/api/process", json={"text": "No PII in this sentence."})
     assert response.status_code == 502
-    assert response.json()["detail"] == "OPENAI_API_KEY is not configured."
+    assert response.json()["detail"] == "GROQ_API_KEY is not configured."
     assert audit.list_recent()[0]["status"] == "failed"
+
+
+def test_groq_provider_builds_model_request_without_network(monkeypatch):
+    settings = Settings(
+        groq_api_key="test-key-never-sent",
+        groq_model="openai/gpt-oss-20b",
+    )
+    provider = GroqProvider(settings)
+    captured = {}
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "model": "openai/gpt-oss-20b",
+                "choices": [{"message": {"content": "Processed <PERSON_1>."}}],
+            }
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            captured["timeout"] = timeout
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            captured.update(url=url, content=content, headers=headers)
+            return FakeResponse()
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+
+    import asyncio
+
+    payload = provider.build_payload("<PERSON_1> applied.", "summarize")
+    result = asyncio.run(provider.complete(json.dumps(payload)))
+    assert provider.name == "groq"
+    assert payload["model"] == "openai/gpt-oss-20b"
+    assert captured["url"] == "https://api.groq.com/openai/v1/chat/completions"
+    assert captured["headers"]["Authorization"] == "Bearer test-key-never-sent"
+    assert b"<PERSON_1>" in captured["content"]
+    assert result.text == "Processed <PERSON_1>."
+
+
+def test_groq_is_default_provider_and_reports_missing_key(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite:///{tmp_path / 'audit.db'}",
+        enable_gliner=False,
+        groq_api_key="",
+    )
+    audit = AuditStore(settings.database_url)
+    gateway = Gateway(settings, audit)
+    client = TestClient(create_app(settings, gateway))
+    response = client.post(
+        "/api/process", json={"text": "No personal information."}
+    )
+    assert gateway.settings.llm_provider == "groq"
+    assert gateway.providers["groq"].model == "openai/gpt-oss-20b"
+    assert response.status_code == 502
+    assert response.json()["detail"] == "GROQ_API_KEY is not configured."
+
+
+def test_groq_provider_reports_missing_key_by_environment_variable_name():
+    provider = GroqProvider(Settings(groq_api_key=""))
+    import asyncio
+
+    try:
+        asyncio.run(provider.complete("{}"))
+    except LLMError as exc:
+        assert str(exc) == "GROQ_API_KEY is not configured."
+    else:
+        raise AssertionError("Expected missing Groq API key to fail")
 
 
 def test_large_input_limit_is_enforced(tmp_path):
@@ -148,7 +229,7 @@ def test_large_input_limit_is_enforced(tmp_path):
         max_input_chars=8,
     )
     audit = AuditStore(settings.database_url)
-    client = TestClient(create_app(settings, Gateway(settings, audit, {"openai": StubProvider()})))
+    client = TestClient(create_app(settings, Gateway(settings, audit, {"groq": StubProvider()})))
     response = client.post("/api/detect", json={"text": "0123456789"})
     assert response.status_code == 413
 
@@ -195,7 +276,7 @@ def test_api_process_masks_all_detected_raw_pii_before_provider_call(tmp_path):
         "Rahul Sharma has PAN ABCPK1234F and Aadhaar 2345 6789 0123."
     )
     response = client.post(
-        "/api/process", json={"text": text, "provider": "openai"}
+        "/api/process", json={"text": text, "provider": "groq"}
     )
     assert response.status_code == 200
     outbound = provider.payloads[0]
@@ -216,7 +297,7 @@ def test_audit_detail_requires_auth_and_contains_no_original_pii(tmp_path):
     client, _, _ = _client(tmp_path, audit_api_key="audit-test-key")
     response = client.post(
         "/api/process",
-        json={"text": "Rahul Sharma applied for a loan.", "provider": "openai"},
+        json={"text": "Rahul Sharma applied for a loan.", "provider": "groq"},
     )
     assert response.status_code == 200
     request_id = response.json()["request_id"]
@@ -285,7 +366,7 @@ def test_reinsert_respects_configured_input_limit(tmp_path):
     )
     audit = AuditStore(settings.database_url)
     client = TestClient(
-        create_app(settings, Gateway(settings, audit, {"openai": StubProvider()}))
+        create_app(settings, Gateway(settings, audit, {"groq": StubProvider()}))
     )
     response = client.post(
         "/api/reinsert",

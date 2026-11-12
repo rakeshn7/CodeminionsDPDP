@@ -15,13 +15,13 @@ _SYSTEM_PROMPT = (
 )
 
 
-class OpenAICompatibleProvider(LLMProvider):
-    name = "openai"
+class GroqProvider(LLMProvider):
+    name = "groq"
 
     def __init__(self, settings: Settings) -> None:
-        self.api_key = settings.openai_api_key
-        self.base_url = settings.openai_base_url
-        self.model = settings.openai_model
+        self.api_key = settings.groq_api_key
+        self.base_url = settings.groq_base_url
+        self.model = settings.groq_model
 
     def build_payload(self, sanitized_text: str, task: str) -> dict:
         task_instruction = (
@@ -43,7 +43,7 @@ class OpenAICompatibleProvider(LLMProvider):
 
     async def complete(self, serialized_payload: str) -> LLMResult:
         if not self.api_key:
-            raise LLMError("OPENAI_API_KEY is not configured.")
+            raise LLMError("GROQ_API_KEY is not configured.")
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",

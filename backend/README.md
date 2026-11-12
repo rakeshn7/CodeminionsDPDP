@@ -18,19 +18,24 @@ python -m spacy download en_core_web_sm
 Copy-Item .env.example .env
 ```
 
-Set `OPENAI_API_KEY` and `AUDIT_API_KEY` in the process environment or in your
-local `.env` file. The application loads `.env` from its working directory.
-The `openai` adapter uses the OpenAI-compatible `/chat/completions` endpoint;
-configure `OPENAI_BASE_URL`, `OPENAI_MODEL`, and `LLM_PROVIDER` as needed. No
-credential is stored in source.
+The only configured LLM provider is Groq, using its `/openai/v1/chat/completions`
+endpoint.
+Set `GROQ_API_KEY` and `AUDIT_API_KEY` in the process environment or local
+`.env` file. The default model is `openai/gpt-oss-20b`, Groq's recommended
+replacement for the retired Llama 3.1 8B Instant model. Configure `GROQ_MODEL`
+and `GROQ_BASE_URL` as needed. The application loads `.env` from its working
+directory; no credentials are stored in source.
 
 To run from this directory:
 
 ```powershell
-$env:OPENAI_API_KEY = "your-key"
+$env:GROQ_API_KEY = "your-rotated-key"
 $env:AUDIT_API_KEY = "a-long-random-secret"
 uvicorn app.main:app --reload
 ```
+
+Do not paste API keys into source code, commits, or chat. If a key has been
+shared, revoke it and configure a newly generated key locally.
 
 Interactive API documentation is at `http://127.0.0.1:8000/docs`. `GET /health`
 reports whether Presidio's configured spaCy model and GLiNER are ready. GLiNER

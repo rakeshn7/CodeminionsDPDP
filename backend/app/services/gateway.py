@@ -10,7 +10,7 @@ from app.config import Settings
 from app.detection.ner_engine import GlinerEngine
 from app.detection.presidio_engine import PresidioDetectionEngine
 from app.llm.base import LLMError, LLMProvider
-from app.llm.provider import OpenAICompatibleProvider, serialize_payload
+from app.llm.provider import GroqProvider, serialize_payload
 from app.privacy.outbound_guard import verify_outbound
 from app.privacy.reinsertion import reinsert
 from app.privacy.token_manager import TokenManager
@@ -31,8 +31,7 @@ class Gateway:
         self.audit = audit_store
         self.ner = GlinerEngine(settings.gliner_model, settings.enable_gliner)
         self.detector = PresidioDetectionEngine(settings.spacy_model, self.ner)
-        default_provider = OpenAICompatibleProvider(settings)
-        self.providers = providers or {default_provider.name: default_provider}
+        self.providers = providers or {"groq": GroqProvider(settings)}
         self._vault: dict[str, tuple[float, dict[str, str]]] = {}
 
     def detection_status(self) -> dict:

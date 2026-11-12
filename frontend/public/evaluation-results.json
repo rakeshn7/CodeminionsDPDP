@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "total_documents_tested": 50,
+    "raw_pii_leakage_count": 25,
+    "placeholder_reinsertion_accuracy": 94.37,
+    "average_latency_ms": 217.98,
+    "min_latency_ms": 124,
+    "max_latency_ms": 329
+  },
+  "entity_metrics": [
+    {
+      "name": "PERSON",
+      "precision": 0.9792,
+      "recall": 0.94,
+      "f1": 0.9592
+    },
+    {
+      "name": "AADHAAR",
+      "precision": 0.9474,
+      "recall": 0.9,
+      "f1": 0.9231
+    },
+    {
+      "name": "PAN",
+      "precision": 0.92,
+      "recall": 0.92,
+      "f1": 0.92
+    },
+    {
+      "name": "GSTIN",
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.9474
+    },
+    {
+      "name": "VOTER_ID",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "name": "PASSPORT",
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.9474
+    },
+    {
+      "name": "ADDRESS",
+      "precision": 0.9184,
+      "recall": 0.9,
+      "f1": 0.9091
+    }
+  ],
+  "privacy_metrics": {
+    "outbound_requests_blocked": 12,
+    "outbound_requests_passed": 38,
+    "raw_pii_leakage_count": 25,
+    "placeholder_reinsertion_accuracy": 94.37
+  },
+  "source": "synthetic benchmark generated from dataset/generate_dataset.py"
+}

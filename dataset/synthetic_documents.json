@@ -1,0 +1,1552 @@
+[
+  {
+    "document_id": "loan-applications-01",
+    "category": "Loan applications",
+    "text": "Loan application for Gaurav Bansal. PAN HHEXD9935C. Aadhaar 2824 1409 5506. Address: 518, MG Road, Lucknow 404255. Requested amount: INR 358496.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Gaurav Bansal",
+        "start": 21,
+        "end": 34
+      },
+      {
+        "type": "PAN",
+        "value": "HHEXD9935C",
+        "start": 40,
+        "end": 50
+      },
+      {
+        "type": "AADHAAR",
+        "value": "2824 1409 5506",
+        "start": 60,
+        "end": 74
+      },
+      {
+        "type": "ADDRESS",
+        "value": "518, MG Road, Lucknow 404255",
+        "start": 85,
+        "end": 113
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-02",
+    "category": "Loan applications",
+    "text": "Loan application for Rohan Srivastava. PAN OSIZA3615W. Aadhaar 9928 7873 4611. Address: 95, Jayanagar, Kochi 298209. Requested amount: INR 510663.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Rohan Srivastava",
+        "start": 21,
+        "end": 37
+      },
+      {
+        "type": "PAN",
+        "value": "OSIZA3615W",
+        "start": 43,
+        "end": 53
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9928 7873 4611",
+        "start": 63,
+        "end": 77
+      },
+      {
+        "type": "ADDRESS",
+        "value": "95, Jayanagar, Kochi 298209",
+        "start": 88,
+        "end": 115
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-03",
+    "category": "Loan applications",
+    "text": "Loan application for Tanvi Shah. PAN RDMCR5803U. Aadhaar 5333 1711 8527. Address: 82, Jayanagar, Mumbai 309296. Requested amount: INR 441476.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Tanvi Shah",
+        "start": 21,
+        "end": 31
+      },
+      {
+        "type": "PAN",
+        "value": "RDMCR5803U",
+        "start": 37,
+        "end": 47
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5333 1711 8527",
+        "start": 57,
+        "end": 71
+      },
+      {
+        "type": "ADDRESS",
+        "value": "82, Jayanagar, Mumbai 309296",
+        "start": 82,
+        "end": 110
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-04",
+    "category": "Loan applications",
+    "text": "Loan application for Harsh Vyas. PAN LGVIW2169T. Aadhaar 6977 3664 7065. Address: 277, Banjara Hills, Ahmedabad 468936. Requested amount: INR 490035.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Harsh Vyas",
+        "start": 21,
+        "end": 31
+      },
+      {
+        "type": "PAN",
+        "value": "LGVIW2169T",
+        "start": 37,
+        "end": 47
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6977 3664 7065",
+        "start": 57,
+        "end": 71
+      },
+      {
+        "type": "ADDRESS",
+        "value": "277, Banjara Hills, Ahmedabad 468936",
+        "start": 82,
+        "end": 118
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-05",
+    "category": "Loan applications",
+    "text": "Loan application for Priya Nair. PAN MICGS6155G. Aadhaar 4752 1525 6168. Address: 253, Residency Road, Ahmedabad 501651. Requested amount: INR 762982.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Priya Nair",
+        "start": 21,
+        "end": 31
+      },
+      {
+        "type": "PAN",
+        "value": "MICGS6155G",
+        "start": 37,
+        "end": 47
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4752 1525 6168",
+        "start": 57,
+        "end": 71
+      },
+      {
+        "type": "ADDRESS",
+        "value": "253, Residency Road, Ahmedabad 501651",
+        "start": 82,
+        "end": 119
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-06",
+    "category": "Loan applications",
+    "text": "Loan application for Neha Kulkarni. PAN EQPCY1771D. Aadhaar 7543 6930 4593. Address: 542, MG Road, Chennai 466665. Requested amount: INR 905731.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Neha Kulkarni",
+        "start": 21,
+        "end": 34
+      },
+      {
+        "type": "PAN",
+        "value": "EQPCY1771D",
+        "start": 40,
+        "end": 50
+      },
+      {
+        "type": "AADHAAR",
+        "value": "7543 6930 4593",
+        "start": 60,
+        "end": 74
+      },
+      {
+        "type": "ADDRESS",
+        "value": "542, MG Road, Chennai 466665",
+        "start": 85,
+        "end": 113
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-07",
+    "category": "Loan applications",
+    "text": "Loan application for Sandeep Rao. PAN DJNFO1053X. Aadhaar 9797 5371 6573. Address: 624, Koramangala, Mumbai 306039. Requested amount: INR 949550.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Sandeep Rao",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "DJNFO1053X",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9797 5371 6573",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "624, Koramangala, Mumbai 306039",
+        "start": 83,
+        "end": 114
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-08",
+    "category": "Loan applications",
+    "text": "Loan application for Arjun Patel. PAN TKPAD6947Z. Aadhaar 9837 9689 1009. Address: 836, Koramangala, Hyderabad 177315. Requested amount: INR 841798.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "TKPAD6947Z",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9837 9689 1009",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "836, Koramangala, Hyderabad 177315",
+        "start": 83,
+        "end": 117
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-09",
+    "category": "Loan applications",
+    "text": "Loan application for Pooja Menon. PAN TNGRY4295W. Aadhaar 3705 5342 9645. Address: 254, Jayanagar, Mumbai 287255. Requested amount: INR 172056.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Pooja Menon",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "TNGRY4295W",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "3705 5342 9645",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "254, Jayanagar, Mumbai 287255",
+        "start": 83,
+        "end": 112
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-10",
+    "category": "Loan applications",
+    "text": "Loan application for Ishaan Kapoor. PAN CWUBH2104B. Aadhaar 4770 4608 1117. Address: 553, Whitefield, Pune 237401. Requested amount: INR 645948.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Ishaan Kapoor",
+        "start": 21,
+        "end": 34
+      },
+      {
+        "type": "PAN",
+        "value": "CWUBH2104B",
+        "start": 40,
+        "end": 50
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4770 4608 1117",
+        "start": 60,
+        "end": 74
+      },
+      {
+        "type": "ADDRESS",
+        "value": "553, Whitefield, Pune 237401",
+        "start": 85,
+        "end": 113
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-11",
+    "category": "Loan applications",
+    "text": "Loan application for Neha Kulkarni. PAN VNLNN8651X. Aadhaar 4119 2545 2588. Address: 197, Whitefield, Mumbai 183496. Requested amount: INR 592374.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Neha Kulkarni",
+        "start": 21,
+        "end": 34
+      },
+      {
+        "type": "PAN",
+        "value": "VNLNN8651X",
+        "start": 40,
+        "end": 50
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4119 2545 2588",
+        "start": 60,
+        "end": 74
+      },
+      {
+        "type": "ADDRESS",
+        "value": "197, Whitefield, Mumbai 183496",
+        "start": 85,
+        "end": 115
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-12",
+    "category": "Loan applications",
+    "text": "Loan application for Arjun Patel. PAN COZRD1828U. Aadhaar 5563 8579 5092. Address: 493, Cubbon Park Road, Mumbai 140742. Requested amount: INR 322634.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "COZRD1828U",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5563 8579 5092",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "493, Cubbon Park Road, Mumbai 140742",
+        "start": 83,
+        "end": 119
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-13",
+    "category": "Loan applications",
+    "text": "Loan application for Divya Sethi. PAN ZZOJN8973E. Aadhaar 1035 7396 5345. Address: 52, Whitefield, Lucknow 373639. Requested amount: INR 706926.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Divya Sethi",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "ZZOJN8973E",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "1035 7396 5345",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "52, Whitefield, Lucknow 373639",
+        "start": 83,
+        "end": 113
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-14",
+    "category": "Loan applications",
+    "text": "Loan application for Arjun Patel. PAN FCTCV4853M. Aadhaar 1931 9320 2312. Address: 210, Banjara Hills, Delhi 249259. Requested amount: INR 565011.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "FCTCV4853M",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "1931 9320 2312",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "210, Banjara Hills, Delhi 249259",
+        "start": 83,
+        "end": 115
+      }
+    ]
+  },
+  {
+    "document_id": "loan-applications-15",
+    "category": "Loan applications",
+    "text": "Loan application for Meera Singh. PAN YCAOT2638C. Aadhaar 5915 8491 6180. Address: 901, Old Airport Road, Mumbai 259416. Requested amount: INR 315409.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Meera Singh",
+        "start": 21,
+        "end": 32
+      },
+      {
+        "type": "PAN",
+        "value": "YCAOT2638C",
+        "start": 38,
+        "end": 48
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5915 8491 6180",
+        "start": 58,
+        "end": 72
+      },
+      {
+        "type": "ADDRESS",
+        "value": "901, Old Airport Road, Mumbai 259416",
+        "start": 83,
+        "end": 119
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-01",
+    "category": "KYC documents",
+    "text": "KYC verification record for Harsh Vyas. Voter ID: ABC3607983. Aadhaar 9900 5956 9666. Address: 620, Old Airport Road, Mumbai 216744. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Harsh Vyas",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC3607983",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9900 5956 9666",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "620, Old Airport Road, Mumbai 216744",
+        "start": 95,
+        "end": 131
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-02",
+    "category": "KYC documents",
+    "text": "KYC verification record for Aisha Khan. Voter ID: ABC3710895. Aadhaar 5325 9280 9004. Address: 575, Jayanagar, Bengaluru 149450. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Aisha Khan",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC3710895",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5325 9280 9004",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "575, Jayanagar, Bengaluru 149450",
+        "start": 95,
+        "end": 127
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-03",
+    "category": "KYC documents",
+    "text": "KYC verification record for Rohan Srivastava. Voter ID: ABC4524499. Aadhaar 3442 9938 1590. Address: 363, Cubbon Park Road, Ahmedabad 435406. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Rohan Srivastava",
+        "start": 30,
+        "end": 46
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC4524499",
+        "start": 56,
+        "end": 66
+      },
+      {
+        "type": "AADHAAR",
+        "value": "3442 9938 1590",
+        "start": 76,
+        "end": 90
+      },
+      {
+        "type": "ADDRESS",
+        "value": "363, Cubbon Park Road, Ahmedabad 435406",
+        "start": 101,
+        "end": 140
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-04",
+    "category": "KYC documents",
+    "text": "KYC verification record for Mitali Das. Voter ID: ABC3670896. Aadhaar 3532 4878 3662. Address: 894, Whitefield, Bengaluru 226620. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Mitali Das",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC3670896",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "3532 4878 3662",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "894, Whitefield, Bengaluru 226620",
+        "start": 95,
+        "end": 128
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-05",
+    "category": "KYC documents",
+    "text": "KYC verification record for Nisha Reddy. Voter ID: ABC6891254. Aadhaar 8541 6728 6000. Address: 340, Jayanagar, Bengaluru 246952. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Nisha Reddy",
+        "start": 30,
+        "end": 41
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC6891254",
+        "start": 51,
+        "end": 61
+      },
+      {
+        "type": "AADHAAR",
+        "value": "8541 6728 6000",
+        "start": 71,
+        "end": 85
+      },
+      {
+        "type": "ADDRESS",
+        "value": "340, Jayanagar, Bengaluru 246952",
+        "start": 96,
+        "end": 128
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-06",
+    "category": "KYC documents",
+    "text": "KYC verification record for Arjun Patel. Voter ID: ABC4188992. Aadhaar 5349 1626 2776. Address: 726, MG Road, Kochi 382588. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 30,
+        "end": 41
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC4188992",
+        "start": 51,
+        "end": 61
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5349 1626 2776",
+        "start": 71,
+        "end": 85
+      },
+      {
+        "type": "ADDRESS",
+        "value": "726, MG Road, Kochi 382588",
+        "start": 96,
+        "end": 122
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-07",
+    "category": "KYC documents",
+    "text": "KYC verification record for Shreya Nair. Voter ID: ABC6472441. Aadhaar 4228 6967 8066. Address: 568, Banjara Hills, Pune 330435. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Shreya Nair",
+        "start": 30,
+        "end": 41
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC6472441",
+        "start": 51,
+        "end": 61
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4228 6967 8066",
+        "start": 71,
+        "end": 85
+      },
+      {
+        "type": "ADDRESS",
+        "value": "568, Banjara Hills, Pune 330435",
+        "start": 96,
+        "end": 127
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-08",
+    "category": "KYC documents",
+    "text": "KYC verification record for Aisha Khan. Voter ID: ABC8418210. Aadhaar 7211 3851 5930. Address: 485, Jayanagar, Pune 258786. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Aisha Khan",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC8418210",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "7211 3851 5930",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "485, Jayanagar, Pune 258786",
+        "start": 95,
+        "end": 122
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-09",
+    "category": "KYC documents",
+    "text": "KYC verification record for Aditya Iyer. Voter ID: ABC8640615. Aadhaar 6491 2530 4848. Address: 736, Whitefield, Kochi 319534. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Aditya Iyer",
+        "start": 30,
+        "end": 41
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC8640615",
+        "start": 51,
+        "end": 61
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6491 2530 4848",
+        "start": 71,
+        "end": 85
+      },
+      {
+        "type": "ADDRESS",
+        "value": "736, Whitefield, Kochi 319534",
+        "start": 96,
+        "end": 125
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-10",
+    "category": "KYC documents",
+    "text": "KYC verification record for Karan Mehta. Voter ID: ABC3237058. Aadhaar 3417 1090 2746. Address: 573, Old Airport Road, Lucknow 505969. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Karan Mehta",
+        "start": 30,
+        "end": 41
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC3237058",
+        "start": 51,
+        "end": 61
+      },
+      {
+        "type": "AADHAAR",
+        "value": "3417 1090 2746",
+        "start": 71,
+        "end": 85
+      },
+      {
+        "type": "ADDRESS",
+        "value": "573, Old Airport Road, Lucknow 505969",
+        "start": 96,
+        "end": 133
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-11",
+    "category": "KYC documents",
+    "text": "KYC verification record for Harsh Vyas. Voter ID: ABC5013879. Aadhaar 9270 7991 9976. Address: 80, Banjara Hills, Chennai 252457. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Harsh Vyas",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC5013879",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9270 7991 9976",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "80, Banjara Hills, Chennai 252457",
+        "start": 95,
+        "end": 128
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-12",
+    "category": "KYC documents",
+    "text": "KYC verification record for Ritika Gupta. Voter ID: ABC6551268. Aadhaar 6238 9849 2320. Address: 64, Cubbon Park Road, Mumbai 314199. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Ritika Gupta",
+        "start": 30,
+        "end": 42
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC6551268",
+        "start": 52,
+        "end": 62
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6238 9849 2320",
+        "start": 72,
+        "end": 86
+      },
+      {
+        "type": "ADDRESS",
+        "value": "64, Cubbon Park Road, Mumbai 314199",
+        "start": 97,
+        "end": 132
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-13",
+    "category": "KYC documents",
+    "text": "KYC verification record for Ishaan Kapoor. Voter ID: ABC5579094. Aadhaar 1320 7232 8814. Address: 30, Old Airport Road, Kochi 460683. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Ishaan Kapoor",
+        "start": 30,
+        "end": 43
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC5579094",
+        "start": 53,
+        "end": 63
+      },
+      {
+        "type": "AADHAAR",
+        "value": "1320 7232 8814",
+        "start": 73,
+        "end": 87
+      },
+      {
+        "type": "ADDRESS",
+        "value": "30, Old Airport Road, Kochi 460683",
+        "start": 98,
+        "end": 132
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-14",
+    "category": "KYC documents",
+    "text": "KYC verification record for Aisha Khan. Voter ID: ABC4048907. Aadhaar 7624 3704 8657. Address: 389, Banjara Hills, Delhi 348394. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Aisha Khan",
+        "start": 30,
+        "end": 40
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC4048907",
+        "start": 50,
+        "end": 60
+      },
+      {
+        "type": "AADHAAR",
+        "value": "7624 3704 8657",
+        "start": 70,
+        "end": 84
+      },
+      {
+        "type": "ADDRESS",
+        "value": "389, Banjara Hills, Delhi 348394",
+        "start": 95,
+        "end": 127
+      }
+    ]
+  },
+  {
+    "document_id": "kyc-documents-15",
+    "category": "KYC documents",
+    "text": "KYC verification record for Ritika Gupta. Voter ID: ABC2151225. Aadhaar 6529 7211 5558. Address: 973, Banjara Hills, Mumbai 549998. Please verify resident status.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Ritika Gupta",
+        "start": 30,
+        "end": 42
+      },
+      {
+        "type": "VOTER_ID",
+        "value": "ABC2151225",
+        "start": 52,
+        "end": 62
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6529 7211 5558",
+        "start": 72,
+        "end": 86
+      },
+      {
+        "type": "ADDRESS",
+        "value": "973, Banjara Hills, Mumbai 549998",
+        "start": 97,
+        "end": 130
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-01",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Rahul Sharma. Passport number: K2813596. PAN: PVDSG8619W. Customer address 593, Residency Road, Bengaluru 411884. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Rahul Sharma",
+        "start": 25,
+        "end": 37
+      },
+      {
+        "type": "PASSPORT",
+        "value": "K2813596",
+        "start": 56,
+        "end": 64
+      },
+      {
+        "type": "PAN",
+        "value": "PVDSG8619W",
+        "start": 71,
+        "end": 81
+      },
+      {
+        "type": "ADDRESS",
+        "value": "593, Residency Road, Bengaluru 411884",
+        "start": 100,
+        "end": 137
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-02",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Aisha Khan. Passport number: P7217147. PAN: CSWUH2669W. Customer address 71, Old Airport Road, Ahmedabad 116634. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Aisha Khan",
+        "start": 25,
+        "end": 35
+      },
+      {
+        "type": "PASSPORT",
+        "value": "P7217147",
+        "start": 54,
+        "end": 62
+      },
+      {
+        "type": "PAN",
+        "value": "CSWUH2669W",
+        "start": 69,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "71, Old Airport Road, Ahmedabad 116634",
+        "start": 98,
+        "end": 136
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-03",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Neha Kulkarni. Passport number: P5502929. PAN: LUOWE8135F. Customer address 331, Jayanagar, Mumbai 256239. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Neha Kulkarni",
+        "start": 25,
+        "end": 38
+      },
+      {
+        "type": "PASSPORT",
+        "value": "P5502929",
+        "start": 57,
+        "end": 65
+      },
+      {
+        "type": "PAN",
+        "value": "LUOWE8135F",
+        "start": 72,
+        "end": 82
+      },
+      {
+        "type": "ADDRESS",
+        "value": "331, Jayanagar, Mumbai 256239",
+        "start": 101,
+        "end": 130
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-04",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Harsh Vyas. Passport number: Z9667566. PAN: KAPKF8988G. Customer address 971, Jayanagar, Mumbai 236541. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Harsh Vyas",
+        "start": 25,
+        "end": 35
+      },
+      {
+        "type": "PASSPORT",
+        "value": "Z9667566",
+        "start": 54,
+        "end": 62
+      },
+      {
+        "type": "PAN",
+        "value": "KAPKF8988G",
+        "start": 69,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "971, Jayanagar, Mumbai 236541",
+        "start": 98,
+        "end": 127
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-05",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Mitali Das. Passport number: N6137284. PAN: WPUWP8342Z. Customer address 680, Old Airport Road, Lucknow 358125. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Mitali Das",
+        "start": 25,
+        "end": 35
+      },
+      {
+        "type": "PASSPORT",
+        "value": "N6137284",
+        "start": 54,
+        "end": 62
+      },
+      {
+        "type": "PAN",
+        "value": "WPUWP8342Z",
+        "start": 69,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "680, Old Airport Road, Lucknow 358125",
+        "start": 98,
+        "end": 135
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-06",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Shreya Nair. Passport number: K3005795. PAN: XRKLW8434I. Customer address 761, Koramangala, Ahmedabad 210423. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Shreya Nair",
+        "start": 25,
+        "end": 36
+      },
+      {
+        "type": "PASSPORT",
+        "value": "K3005795",
+        "start": 55,
+        "end": 63
+      },
+      {
+        "type": "PAN",
+        "value": "XRKLW8434I",
+        "start": 70,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "761, Koramangala, Ahmedabad 210423",
+        "start": 99,
+        "end": 133
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-07",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Nisha Reddy. Passport number: K1763626. PAN: TJDGJ4727L. Customer address 998, Residency Road, Bengaluru 475648. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Nisha Reddy",
+        "start": 25,
+        "end": 36
+      },
+      {
+        "type": "PASSPORT",
+        "value": "K1763626",
+        "start": 55,
+        "end": 63
+      },
+      {
+        "type": "PAN",
+        "value": "TJDGJ4727L",
+        "start": 70,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "998, Residency Road, Bengaluru 475648",
+        "start": 99,
+        "end": 136
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-08",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Meera Singh. Passport number: P9250138. PAN: SJPPO6582F. Customer address 76, MG Road, Lucknow 189549. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Meera Singh",
+        "start": 25,
+        "end": 36
+      },
+      {
+        "type": "PASSPORT",
+        "value": "P9250138",
+        "start": 55,
+        "end": 63
+      },
+      {
+        "type": "PAN",
+        "value": "SJPPO6582F",
+        "start": 70,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "76, MG Road, Lucknow 189549",
+        "start": 99,
+        "end": 126
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-09",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Meera Singh. Passport number: P6123430. PAN: DRYNT4697Y. Customer address 583, MG Road, Lucknow 429623. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Meera Singh",
+        "start": 25,
+        "end": 36
+      },
+      {
+        "type": "PASSPORT",
+        "value": "P6123430",
+        "start": 55,
+        "end": 63
+      },
+      {
+        "type": "PAN",
+        "value": "DRYNT4697Y",
+        "start": 70,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "583, MG Road, Lucknow 429623",
+        "start": 99,
+        "end": 127
+      }
+    ]
+  },
+  {
+    "document_id": "customer-support-tickets-10",
+    "category": "Customer support tickets",
+    "text": "Support ticket raised by Mitali Das. Passport number: P5886520. PAN: IVCFH3847R. Customer address 34, Residency Road, Mumbai 480649. Helpful in Kannada: \"namma customer ge help maadbeku\".",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Mitali Das",
+        "start": 25,
+        "end": 35
+      },
+      {
+        "type": "PASSPORT",
+        "value": "P5886520",
+        "start": 54,
+        "end": 62
+      },
+      {
+        "type": "PAN",
+        "value": "IVCFH3847R",
+        "start": 69,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "34, Residency Road, Mumbai 480649",
+        "start": 98,
+        "end": 131
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-01",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Vikram Joshi. GSTIN: 25ABCDE9922F4Z3. Aadhaar 8438 2166 4824. Policy cover requested for 62, Residency Road, Pune 421975.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Vikram Joshi",
+        "start": 20,
+        "end": 32
+      },
+      {
+        "type": "GSTIN",
+        "value": "25ABCDE9922F4Z3",
+        "start": 41,
+        "end": 56
+      },
+      {
+        "type": "AADHAAR",
+        "value": "8438 2166 4824",
+        "start": 66,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "62, Residency Road, Pune 421975",
+        "start": 109,
+        "end": 140
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-02",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Mitali Das. GSTIN: 80ABCDE9090F8Z2. Aadhaar 5728 8195 3037. Policy cover requested for 619, MG Road, Chennai 157882.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Mitali Das",
+        "start": 20,
+        "end": 30
+      },
+      {
+        "type": "GSTIN",
+        "value": "80ABCDE9090F8Z2",
+        "start": 39,
+        "end": 54
+      },
+      {
+        "type": "AADHAAR",
+        "value": "5728 8195 3037",
+        "start": 64,
+        "end": 78
+      },
+      {
+        "type": "ADDRESS",
+        "value": "619, MG Road, Chennai 157882",
+        "start": 107,
+        "end": 135
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-03",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Karan Mehta. GSTIN: 34ABCDE8141F8Z2. Aadhaar 1339 5415 1659. Policy cover requested for 342, Jayanagar, Delhi 559700.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Karan Mehta",
+        "start": 20,
+        "end": 31
+      },
+      {
+        "type": "GSTIN",
+        "value": "34ABCDE8141F8Z2",
+        "start": 40,
+        "end": 55
+      },
+      {
+        "type": "AADHAAR",
+        "value": "1339 5415 1659",
+        "start": 65,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "342, Jayanagar, Delhi 559700",
+        "start": 108,
+        "end": 136
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-04",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Arjun Patel. GSTIN: 22ABCDE6153F5Z6. Aadhaar 6403 7744 9117. Policy cover requested for 845, Whitefield, Bengaluru 326661.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 20,
+        "end": 31
+      },
+      {
+        "type": "GSTIN",
+        "value": "22ABCDE6153F5Z6",
+        "start": 40,
+        "end": 55
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6403 7744 9117",
+        "start": 65,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "845, Whitefield, Bengaluru 326661",
+        "start": 108,
+        "end": 141
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-05",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Priya Nair. GSTIN: 45ABCDE9998F3Z5. Aadhaar 4073 9494 6927. Policy cover requested for 30, Banjara Hills, Lucknow 482131.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Priya Nair",
+        "start": 20,
+        "end": 30
+      },
+      {
+        "type": "GSTIN",
+        "value": "45ABCDE9998F3Z5",
+        "start": 39,
+        "end": 54
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4073 9494 6927",
+        "start": 64,
+        "end": 78
+      },
+      {
+        "type": "ADDRESS",
+        "value": "30, Banjara Hills, Lucknow 482131",
+        "start": 107,
+        "end": 140
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-06",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Arjun Patel. GSTIN: 48ABCDE9337F5Z7. Aadhaar 6091 1224 7684. Policy cover requested for 468, Koramangala, Ahmedabad 311110.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Arjun Patel",
+        "start": 20,
+        "end": 31
+      },
+      {
+        "type": "GSTIN",
+        "value": "48ABCDE9337F5Z7",
+        "start": 40,
+        "end": 55
+      },
+      {
+        "type": "AADHAAR",
+        "value": "6091 1224 7684",
+        "start": 65,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "468, Koramangala, Ahmedabad 311110",
+        "start": 108,
+        "end": 142
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-07",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Nisha Reddy. GSTIN: 11ABCDE5634F5Z8. Aadhaar 9327 3236 2143. Policy cover requested for 354, Cubbon Park Road, Delhi 348732.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Nisha Reddy",
+        "start": 20,
+        "end": 31
+      },
+      {
+        "type": "GSTIN",
+        "value": "11ABCDE5634F5Z8",
+        "start": 40,
+        "end": 55
+      },
+      {
+        "type": "AADHAAR",
+        "value": "9327 3236 2143",
+        "start": 65,
+        "end": 79
+      },
+      {
+        "type": "ADDRESS",
+        "value": "354, Cubbon Park Road, Delhi 348732",
+        "start": 108,
+        "end": 143
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-08",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Ritika Gupta. GSTIN: 59ABCDE7325F3Z8. Aadhaar 4090 4912 7274. Policy cover requested for 989, Old Airport Road, Lucknow 162620.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Ritika Gupta",
+        "start": 20,
+        "end": 32
+      },
+      {
+        "type": "GSTIN",
+        "value": "59ABCDE7325F3Z8",
+        "start": 41,
+        "end": 56
+      },
+      {
+        "type": "AADHAAR",
+        "value": "4090 4912 7274",
+        "start": 66,
+        "end": 80
+      },
+      {
+        "type": "ADDRESS",
+        "value": "989, Old Airport Road, Lucknow 162620",
+        "start": 109,
+        "end": 146
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-09",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Harsh Vyas. GSTIN: 71ABCDE5342F6Z7. Aadhaar 2633 9617 8486. Policy cover requested for 390, Whitefield, Delhi 393649.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Harsh Vyas",
+        "start": 20,
+        "end": 30
+      },
+      {
+        "type": "GSTIN",
+        "value": "71ABCDE5342F6Z7",
+        "start": 39,
+        "end": 54
+      },
+      {
+        "type": "AADHAAR",
+        "value": "2633 9617 8486",
+        "start": 64,
+        "end": 78
+      },
+      {
+        "type": "ADDRESS",
+        "value": "390, Whitefield, Delhi 393649",
+        "start": 107,
+        "end": 136
+      }
+    ]
+  },
+  {
+    "document_id": "insurance-claims-10",
+    "category": "Insurance claims",
+    "text": "Insurance claim for Priya Nair. GSTIN: 32ABCDE5906F1Z1. Aadhaar 2121 4846 5708. Policy cover requested for 368, Cubbon Park Road, Delhi 186321.",
+    "entities": [
+      {
+        "type": "PERSON",
+        "value": "Priya Nair",
+        "start": 20,
+        "end": 30
+      },
+      {
+        "type": "GSTIN",
+        "value": "32ABCDE5906F1Z1",
+        "start": 39,
+        "end": 54
+      },
+      {
+        "type": "AADHAAR",
+        "value": "2121 4846 5708",
+        "start": 64,
+        "end": 78
+      },
+      {
+        "type": "ADDRESS",
+        "value": "368, Cubbon Park Road, Delhi 186321",
+        "start": 107,
+        "end": 142
+      }
+    ]
+  }
+]

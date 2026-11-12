@@ -4,6 +4,13 @@ import { getMetrics } from '../services/api'
 import MetricCharts from '../components/MetricCharts'
 import StatCard from '../components/StatCard'
 
+const demoMetrics = {
+  totalRequests: 1250,
+  piiEntitiesDetected: 348,
+  outboundLeakageIncidents: 12,
+  avgLatencyMs: 145,
+}
+
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null)
   const [status, setStatus] = useState('loading')
@@ -29,6 +36,8 @@ export default function Dashboard() {
     }
   }, [])
 
+  const displayMetrics = status === 'live' ? metrics : status === 'unavailable' ? demoMetrics : null
+  const demoMode = status === 'unavailable'
   const requestTrend = Array.isArray(metrics?.requestTrend) ? metrics.requestTrend : []
   const piiByCategory = Array.isArray(metrics?.piiByCategory) ? metrics.piiByCategory : []
   const entityMetrics = Array.isArray(metrics?.entityMetrics) ? metrics.entityMetrics : []
@@ -48,15 +57,21 @@ export default function Dashboard() {
         </div>
         <div className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300">
           {status === 'live' ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" /> : <AlertTriangle className="h-3.5 w-3.5 text-amber-300" />}
-          {status === 'live' ? 'Backend metrics available' : status === 'loading' ? 'Loading backend metrics' : 'Metrics unavailable'}
+          {status === 'live' ? 'Backend metrics available' : status === 'loading' ? 'Loading backend metrics' : 'Demo metrics · illustrative'}
         </div>
       </div>
 
+      {demoMode && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100">
+          Illustrative demo values only—not backend measurements or evaluation results. Reinsertion accuracy is unavailable.
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-5">
-        <StatCard title="Total requests processed" value={metrics?.totalRequests ?? '—'} detail="Backend-reported" tone="blue" icon={FileText} />
-        <StatCard title="Total PII entities detected" value={metrics?.piiEntitiesDetected ?? '—'} detail="Backend-reported" tone="amber" icon={ShieldAlert} />
-        <StatCard title="Outbound leakage incidents" value={metrics?.outboundLeakageIncidents ?? '—'} detail="Backend-reported" tone="red" icon={ShieldAlert} />
-        <StatCard title="Average gateway latency" value={metrics?.avgLatencyMs == null ? '—' : `${metrics.avgLatencyMs} ms`} detail="Backend-reported" tone="green" icon={Clock3} />
+        <StatCard title="Total requests processed" value={displayMetrics?.totalRequests ?? '—'} detail={demoMode ? 'Illustrative demo value' : 'Backend-reported'} tone="blue" icon={FileText} />
+        <StatCard title="Total PII entities detected" value={displayMetrics?.piiEntitiesDetected ?? '—'} detail={demoMode ? 'Illustrative demo value' : 'Backend-reported'} tone="amber" icon={ShieldAlert} />
+        <StatCard title="Outbound leakage incidents" value={displayMetrics?.outboundLeakageIncidents ?? '—'} detail={demoMode ? 'Illustrative demo value' : 'Backend-reported'} tone="red" icon={ShieldAlert} />
+        <StatCard title="Average gateway latency" value={displayMetrics?.avgLatencyMs == null ? '—' : `${displayMetrics.avgLatencyMs} ms`} detail={demoMode ? 'Illustrative demo value' : 'Backend-reported'} tone="green" icon={Clock3} />
         <StatCard title="Reinsertion accuracy" value={metrics?.reinsertionAccuracy == null ? '—' : `${metrics.reinsertionAccuracy}%`} detail="Measured evaluation only" tone="blue" icon={ShieldCheck} />
       </div>
 

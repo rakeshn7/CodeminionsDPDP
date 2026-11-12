@@ -45,31 +45,6 @@ export const defaultPolicy = {
   },
 }
 
-export const defaultMetrics = {
-  totalRequests: 1874,
-  piiEntitiesDetected: 3452,
-  outboundLeakageIncidents: 18,
-  avgLatencyMs: 214,
-  reinsertionAccuracy: 96.4,
-  requestTrend: [
-    { day: 'Mon', requests: 180 },
-    { day: 'Tue', requests: 210 },
-    { day: 'Wed', requests: 195 },
-    { day: 'Thu', requests: 260 },
-    { day: 'Fri', requests: 290 },
-    { day: 'Sat', requests: 245 },
-    { day: 'Sun', requests: 320 },
-  ],
-  piiByCategory: [
-    { name: 'PERSON', value: 920 },
-    { name: 'AADHAAR', value: 610 },
-    { name: 'PAN', value: 480 },
-    { name: 'ADDRESS', value: 690 },
-    { name: 'GSTIN', value: 240 },
-    { name: 'PASSPORT', value: 150 },
-  ],
-}
-
 export const defaultAuditData = [
   {
     request_id: 'REQ-1001',

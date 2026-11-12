@@ -21,8 +21,18 @@ class TokenManager:
         return token
 
     def mask(self, text: str, entities: list[EntitySpan]) -> tuple[str, list[dict]]:
+        ordered = sorted(entities, key=lambda item: (item.start, item.end))
+        previous_end = 0
+        for entity in ordered:
+            if (
+                entity.start < previous_end
+                or not 0 <= entity.start < entity.end <= len(text)
+            ):
+                raise ValueError("Entity spans must be valid and non-overlapping.")
+            previous_end = entity.end
+
         replacements = []
-        for entity in entities:
+        for entity in ordered:
             value = text[entity.start : entity.end]
             token = self.token_for(entity.entity_type, value)
             replacements.append((entity, token))

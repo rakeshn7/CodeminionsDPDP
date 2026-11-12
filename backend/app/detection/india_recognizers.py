@@ -47,6 +47,20 @@ _RULES: tuple[tuple[str, re.Pattern[str], float], ...] = (
         re.compile(r"(?<![A-Z0-9])[A-Z][0-9]{7}(?![A-Z0-9])", re.IGNORECASE),
         0.88,
     ),
+    (
+        "PHONE_NUMBER",
+        re.compile(
+            r"(?<![A-Z0-9])(?:\+?91[ -]?|0[ -]?)?"
+            r"[6-9](?:[ -]?\d){9}(?![A-Z0-9])",
+            re.IGNORECASE,
+        ),
+        0.90,
+    ),
+    (
+        "PIN_CODE",
+        re.compile(r"(?<!\d)[1-9]\d{5}(?!\d)"),
+        0.90,
+    ),
 )
 
 _ADDRESS = re.compile(
@@ -80,6 +94,19 @@ def _is_valid(entity_type: str, value: str) -> bool:
             and compact[13] == "Z"
             and compact[-1].isalnum()
         )
+    if entity_type == "PHONE_NUMBER":
+        digits = re.sub(r"\D", "", value)
+        if digits.startswith("91") and len(digits) == 12:
+            digits = digits[2:]
+        elif digits.startswith("0") and len(digits) == 11:
+            digits = digits[1:]
+        return (
+            len(digits) == 10
+            and digits[0] in "6789"
+            and len(set(digits)) > 1
+        )
+    if entity_type == "PIN_CODE":
+        return bool(re.fullmatch(r"[1-9][0-9]{5}", compact))
     return True
 
 

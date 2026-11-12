@@ -26,11 +26,6 @@ def verify_outbound(serialized_payload: str, known_values: list[str]) -> GuardRe
         if not candidate or candidate.casefold() in seen:
             continue
         seen.add(candidate.casefold())
-        # Two-character names are common words and do not provide a reliable
-        # content-based signal in a serialized prompt; longer identity values
-        # and names are checked with token boundaries.
-        if len(candidate) < 3:
-            continue
         if _value_pattern(candidate).search(serialized_payload):
             leaked.append(candidate)
     return GuardResult(not leaked, tuple(leaked))

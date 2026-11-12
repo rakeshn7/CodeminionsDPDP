@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.audit.logger import AuditStore
 from app.config import Settings
+from app.detection.india_recognizers import detect_india_patterns
 from app.detection.ner_engine import NERMatch
 from app.llm.base import LLMError, LLMProvider, LLMResult
 from app.main import create_app
@@ -30,18 +30,22 @@ class StubProvider(LLMProvider):
         return LLMResult(self.response, self.model)
 
 
-def _client(tmp_path, provider=None):
+def _client(tmp_path, provider=None, audit_api_key=""):
     settings = Settings(
         database_url=f"sqlite:///{tmp_path / 'audit.db'}",
         enable_gliner=False,
         max_input_chars=100_000,
+        audit_api_key=audit_api_key,
     )
     audit = AuditStore(settings.database_url)
     gateway = Gateway(settings, audit, {"openai": provider or StubProvider()})
     class TestDetector:
         def detect(self, text):
             names = ("Rahul Sharma", "Asha", "Ravi")
-            entities = []
+            entities = [
+                NERMatch(item.entity_type, item.start, item.end, item.score, item.source)
+                for item in detect_india_patterns(text)
+            ]
             for name in names:
                 start = 0
                 while (index := text.find(name, start)) != -1:
@@ -154,6 +158,88 @@ def test_audit_endpoints_require_credentials(tmp_path):
     assert client.get("/api/audit").status_code == 503
 
 
+def test_audit_endpoints_reject_bad_key_and_accept_configured_key(tmp_path):
+    client, _, _ = _client(tmp_path, audit_api_key="test-audit-secret")
+    assert client.get("/api/audit").status_code == 401
+    assert (
+        client.get(
+            "/api/audit", headers={"Authorization": "Bearer incorrect"}
+        ).status_code
+        == 401
+    )
+    authorized = client.get(
+        "/api/audit",
+        headers={"Authorization": "Bearer test-audit-secret"},
+    )
+    assert authorized.status_code == 200
+
+
+def test_detect_endpoint_reports_pan_offsets_without_raw_values(tmp_path):
+    client, _, _ = _client(tmp_path)
+    text = "PAN ABCPK1234F; invalid PAN ABCDP1234F."
+    response = client.post("/api/detect", json={"text": text})
+    assert response.status_code == 200
+    entities = response.json()["entities"]
+    pans = [entity for entity in entities if entity["type"] == "PAN"]
+    assert len(pans) == 1
+    assert text[pans[0]["start"] : pans[0]["end"]] == "ABCPK1234F"
+    assert "ABCPK1234F" not in response.text
+
+
+def test_api_process_masks_all_detected_raw_pii_before_provider_call(tmp_path):
+    provider = StubProvider(
+        "Applicant <PERSON_1> has <PAN_1> and <AADHAAR_1>."
+    )
+    client, gateway, _ = _client(tmp_path, provider)
+    text = (
+        "Rahul Sharma has PAN ABCPK1234F and Aadhaar 2345 6789 0123."
+    )
+    response = client.post(
+        "/api/process", json={"text": text, "provider": "openai"}
+    )
+    assert response.status_code == 200
+    outbound = provider.payloads[0]
+    assert "Rahul Sharma" not in outbound
+    assert "ABCPK1234F" not in outbound
+    assert "2345 6789 0123" not in outbound
+    body = response.json()
+    assert body["sanitized_text"] == (
+        "<PERSON_1> has PAN <PAN_1> and Aadhaar <AADHAAR_1>."
+    )
+    audit = gateway.audit.get(body["request_id"])
+    assert "Rahul Sharma" not in audit["outbound_payload"]
+    assert "ABCPK1234F" not in audit["outbound_payload"]
+    assert "2345 6789 0123" not in audit["outbound_payload"]
+
+
+def test_audit_detail_requires_auth_and_contains_no_original_pii(tmp_path):
+    client, _, _ = _client(tmp_path, audit_api_key="audit-test-key")
+    response = client.post(
+        "/api/process",
+        json={"text": "Rahul Sharma applied for a loan.", "provider": "openai"},
+    )
+    assert response.status_code == 200
+    request_id = response.json()["request_id"]
+    endpoint = f"/api/audit/{request_id}"
+    assert client.get(endpoint).status_code == 401
+    audit = client.get(
+        endpoint,
+        headers={"Authorization": "Bearer audit-test-key"},
+    )
+    assert audit.status_code == 200
+    assert "Rahul Sharma" not in audit.text
+    assert "mapping" not in audit.text
+
+
+def test_unknown_provider_returns_client_error(tmp_path):
+    client, _, _ = _client(tmp_path)
+    response = client.post(
+        "/api/process", json={"text": "No personal information.", "provider": "unknown"}
+    )
+    assert response.status_code == 400
+    assert "Unsupported provider" in response.json()["detail"]
+
+
 def test_guard_records_blocked_payload_without_persisting_raw_value(tmp_path):
     class LeakingProvider(StubProvider):
         def build_payload(self, sanitized_text: str, task: str) -> dict:
@@ -189,3 +275,20 @@ def test_openapi_documents_response_shapes_and_docs_page(tmp_path):
     assert "restoration" in openapi["components"]["schemas"]["ProcessResponse"][
         "properties"
     ]
+
+
+def test_reinsert_respects_configured_input_limit(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite:///{tmp_path / 'audit.db'}",
+        enable_gliner=False,
+        max_input_chars=8,
+    )
+    audit = AuditStore(settings.database_url)
+    client = TestClient(
+        create_app(settings, Gateway(settings, audit, {"openai": StubProvider()}))
+    )
+    response = client.post(
+        "/api/reinsert",
+        json={"request_id": "unknown", "text": "longer than configured"},
+    )
+    assert response.status_code == 413

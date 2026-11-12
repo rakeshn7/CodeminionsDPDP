@@ -1,0 +1,8 @@
+# Local audit database
+data/
+backend/data/
+
+# Environment secrets
+.env
+.env.*
+!.env.example

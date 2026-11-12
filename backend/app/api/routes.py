@@ -5,8 +5,6 @@ import hmac
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 
 from app.llm.base import LLMError
-from app.privacy.outbound_guard import verify_outbound
-from app.privacy.token_manager import TokenManager
 from app.schemas.request_response import (
     AuditListResponse,
     AuditResponse,
@@ -88,6 +86,8 @@ async def mask(
 async def reinsert(
     body: ReinsertRequest, gateway: Gateway = Depends(get_gateway)
 ) -> ReinsertResultResponse:
+    if len(body.text) > gateway.settings.max_input_chars:
+        raise HTTPException(status_code=413, detail="text exceeds configured input limit")
     result = gateway.reinsert(body.request_id, body.text)
     if result is None:
         raise HTTPException(

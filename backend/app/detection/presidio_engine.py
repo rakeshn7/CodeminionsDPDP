@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from app.detection.india_recognizers import (
@@ -19,6 +20,18 @@ class EntitySpan:
 
 
 class PresidioDetectionEngine:
+    _PERSON_LABELS = {
+        "AADHAAR",
+        "AADHAR",
+        "GSTIN",
+        "PAN",
+        "PASSPORT",
+        "PIN",
+        "PIN CODE",
+        "VOTER",
+        "VOTER ID",
+    }
+
     def __init__(self, spacy_model: str, gliner: GlinerEngine) -> None:
         self.spacy_model = spacy_model
         self.gliner = gliner
@@ -75,6 +88,8 @@ class PresidioDetectionEngine:
                         "GSTIN",
                         "VOTER_ID",
                         "PASSPORT",
+                        "PHONE_NUMBER",
+                        "PIN_CODE",
                         "ADDRESS",
                     ],
                 )
@@ -102,11 +117,25 @@ class PresidioDetectionEngine:
             EntitySpan(item.entity_type, item.start, item.end, item.score, item.source)
             for item in ner_results
         )
-        return self._resolve_overlaps(candidates, len(text))
+        candidates = [
+            item
+            for item in candidates
+            if not self._is_person_label(text, item)
+        ]
+        return self._resolve_overlaps(candidates, len(text), text)
+
+    @classmethod
+    def _is_person_label(cls, text: str, item: EntitySpan) -> bool:
+        value = text[item.start : item.end].strip()
+        return (
+            item.entity_type == "PERSON"
+            and value.isupper()
+            and value in cls._PERSON_LABELS
+        )
 
     @staticmethod
     def _resolve_overlaps(
-        candidates: list[EntitySpan], text_length: int
+        candidates: list[EntitySpan], text_length: int, text: str = ""
     ) -> list[EntitySpan]:
         priority = {
             "GSTIN": 8,
@@ -114,6 +143,8 @@ class PresidioDetectionEngine:
             "PAN": 7,
             "VOTER_ID": 7,
             "PASSPORT": 7,
+            "PHONE_NUMBER": 7,
+            "PIN_CODE": 9,
             "PERSON": 6,
             "ADDRESS": 2,
         }
@@ -122,9 +153,46 @@ class PresidioDetectionEngine:
             for item in candidates
             if 0 <= item.start < item.end <= text_length
         ]
+        if text:
+            pin_codes = [
+                item for item in valid if item.entity_type == "PIN_CODE"
+            ]
+            adjusted: list[EntitySpan] = []
+            for item in valid:
+                if item.entity_type == "ADDRESS":
+                    trailing_pin = next(
+                        (
+                            pin
+                            for pin in pin_codes
+                            if item.start < pin.start < item.end
+                            and not text[pin.end : item.end].strip(" ,.-:")
+                        ),
+                        None,
+                    )
+                    if trailing_pin is not None:
+                        address_end = trailing_pin.start
+                        while (
+                            address_end > item.start
+                            and text[address_end - 1].isspace()
+                        ):
+                            address_end -= 1
+                        item = EntitySpan(
+                            item.entity_type,
+                            item.start,
+                            address_end,
+                            item.score,
+                            item.source,
+                        )
+                if item.start < item.end:
+                    adjusted.append(item)
+            valid = adjusted
         valid.sort(
             key=lambda item: (
                 priority.get(item.entity_type, 0),
+                int(
+                    item.entity_type == "ADDRESS"
+                    and item.source == "india_regex"
+                ),
                 item.score,
                 item.end - item.start,
             ),
@@ -134,4 +202,29 @@ class PresidioDetectionEngine:
         for item in valid:
             if not any(item.start < kept.end and kept.start < item.end for kept in selected):
                 selected.append(item)
-        return sorted(selected, key=lambda item: item.start)
+        ordered = sorted(selected, key=lambda item: item.start)
+        if not text:
+            return ordered
+
+        merged: list[EntitySpan] = []
+        for item in ordered:
+            if (
+                item.entity_type == "ADDRESS"
+                and item.source == "gliner"
+                and merged
+                and merged[-1].entity_type == "ADDRESS"
+                and merged[-1].source == "gliner"
+            ):
+                previous = merged[-1]
+                separator = text[previous.end : item.start]
+                if len(separator) <= 3 and re.fullmatch(r",\s*", separator):
+                    merged[-1] = EntitySpan(
+                        entity_type="ADDRESS",
+                        start=previous.start,
+                        end=item.end,
+                        score=min(previous.score, item.score),
+                        source="gliner",
+                    )
+                    continue
+            merged.append(item)
+        return merged

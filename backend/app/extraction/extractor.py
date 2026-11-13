@@ -367,10 +367,10 @@ def _extract_xlsx(file_path: Path) -> tuple[list[PageContent], bool, list[str]]:
         for sheetname in wb.sheetnames:
             sheet = wb[sheetname]
             rows_data: list[str] = []
-            for row in sheet.iter_rows(values_only=True):
+            for row_number, row in enumerate(sheet.iter_rows(values_only=True), start=1):
                 vals = [str(v).strip() for v in row if v is not None and str(v).strip()]
                 if vals:
-                    rows_data.append(" | ".join(vals))
+                    rows_data.append(f"Row {row_number}: " + " | ".join(vals))
             if rows_data:
                 sheets_text.append(f"=== Sheet: {sheetname} ===\n" + "\n".join(rows_data))
 

@@ -25,6 +25,7 @@ export default function DocumentUploader({
 }) {
   const [dragActive, setDragActive] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState([])
   const [fileError, setFileError] = useState('')
   const fileInputRef = useRef(null)
 
@@ -42,40 +43,38 @@ export default function DocumentUploader({
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelected(e.dataTransfer.files[0])
-    }
+    if (e.dataTransfer.files?.length) handleFilesSelected(Array.from(e.dataTransfer.files))
   }
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileSelected(e.target.files[0])
-    }
+    if (e.target.files?.length) handleFilesSelected(Array.from(e.target.files))
   }
 
-  const handleFileSelected = (file) => {
-    const extension = file.name.split('.').pop()?.toLowerCase()
-    if (!extension || !SUPPORTED_FORMATS.includes(extension)) {
+  const handleFilesSelected = (files) => {
+    if (files.length > 10) {
+      setSelectedFiles([])
       setSelectedFile(null)
-      setFileError('Choose a PDF, DOCX, PPTX, TXT, Markdown, JSON, HTML, CSV, XLSX, or common image file.')
-      onSelectSample?.('')
-      onEditableTextChange?.('')
-      onResetAnalysis?.()
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      setFileError('Select no more than 10 documents at a time.')
       return
     }
-    if (file.size > MAX_FILE_SIZE_BYTES) {
+    const invalid = files.find((file) => {
+      const extension = file.name.split('.').pop()?.toLowerCase()
+      return !extension || !SUPPORTED_FORMATS.includes(extension) || file.size > MAX_FILE_SIZE_BYTES
+    })
+    if (invalid) {
+      setSelectedFiles([])
       setSelectedFile(null)
-      setFileError('The selected file exceeds the 25 MB upload limit.')
-      onSelectSample?.('')
-      onEditableTextChange?.('')
-      onResetAnalysis?.()
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      const extension = invalid.name.split('.').pop()?.toLowerCase()
+      setFileError(
+        !extension || !SUPPORTED_FORMATS.includes(extension)
+          ? `Unsupported file type: ${invalid.name}`
+          : `The file ${invalid.name} exceeds the 25 MB per-file upload limit.`,
+      )
       return
     }
-
+    setSelectedFiles(files)
+    setSelectedFile(files[0])
     setFileError('')
-    setSelectedFile(file)
     onSelectSample?.('')
     onManualTextChange?.('')
     onEditableTextChange?.('')
@@ -83,6 +82,10 @@ export default function DocumentUploader({
   }
 
   const handleStartAnalysis = () => {
+    if (selectedFiles.length > 1) {
+      onAnalyze({ files: selectedFiles, runLlm })
+      return
+    }
     if (selectedFile) {
       onAnalyze({ file: selectedFile, runLlm: false, extractOnly: true })
     }
@@ -104,6 +107,7 @@ export default function DocumentUploader({
 
   const clearSelectedFile = () => {
     setSelectedFile(null)
+    setSelectedFiles([])
     setFileError('')
     onEditableTextChange?.('')
     onResetAnalysis?.()
@@ -154,20 +158,21 @@ export default function DocumentUploader({
           ref={fileInputRef}
           type="file"
           accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.json,.html,.htm,.csv,.xlsx,.jpg,.jpeg,.png,.webp,.bmp,.tif,.tiff"
+          multiple
           onChange={handleFileChange}
           disabled={processing}
           className="hidden"
           id="file-upload-input"
         />
 
-        {selectedFile ? (
+        {selectedFiles.length ? (
           <div className="flex flex-col items-center space-y-2">
             <FileCheck className="h-12 w-12 text-emerald-600" />
             <div>
-              <p className="font-semibold text-slate-900">{selectedFile.name}</p>
-              <p className="text-xs text-slate-500">
-                {(selectedFile.size / 1024).toFixed(1)} KB · {selectedFile.type || 'Document'}
-              </p>
+              <p className="font-semibold text-slate-900">{selectedFiles.length} document{selectedFiles.length === 1 ? '' : 's'} selected</p>
+              <ul className="mt-1 max-h-24 overflow-auto text-xs text-slate-600">
+                {selectedFiles.map((file) => <li key={`${file.name}-${file.size}`}>{file.name}</li>)}
+              </ul>
             </div>
             <div className="flex gap-2 pt-2">
               <button
@@ -184,7 +189,7 @@ export default function DocumentUploader({
             <UploadCloud className="h-12 w-12 text-blue-600" />
             <div>
               <p className="text-sm font-medium text-slate-700">
-                Drag and drop your file here, or{' '}
+                Drag and drop documents here, or{' '}
                 <label
                   htmlFor="file-upload-input"
                   className="cursor-pointer font-semibold text-blue-600 underline hover:text-blue-700"
@@ -193,7 +198,7 @@ export default function DocumentUploader({
                 </label>
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                PDF, DOCX, PPTX, TXT, Markdown, JSON, HTML, CSV, XLSX, JPG, PNG, WEBP, BMP, TIFF (Up to 25 MB)
+                Select up to 10 files (25 MB each). Multiple files are analyzed separately.
               </p>
             </div>
           </div>
@@ -214,6 +219,7 @@ export default function DocumentUploader({
             value={selectedSampleId}
             onChange={(e) => {
               setSelectedFile(null)
+              setSelectedFiles([])
               setFileError('')
               onEditableTextChange?.('')
               onResetAnalysis?.()
@@ -253,10 +259,14 @@ export default function DocumentUploader({
             {processing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {processingAction === 'extract' ? 'Extracting text...' : 'Please wait...'}
+                {processingAction === 'extract'
+                  ? 'Extracting text...'
+                  : processingAction.startsWith('batch-')
+                    ? `Processing ${processingAction.slice(6)} documents...`
+                    : 'Please wait...'}
               </>
             ) : (
-              'Extract text for review'
+              selectedFiles.length > 1 ? `Analyze ${selectedFiles.length} documents` : 'Extract text for review'
             )}
           </button>
         </div>

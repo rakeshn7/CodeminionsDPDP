@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
 from app.audit.logger import AuditStore
@@ -35,6 +36,12 @@ def create_app(
     application.state.settings = resolved_settings
     application.state.gateway = gateway or Gateway(resolved_settings, audit_store)
     audit_store.initialize()
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(resolved_settings.cors_allowed_origins),
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
     application.include_router(router)
     return application
 

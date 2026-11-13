@@ -1,25 +1,91 @@
 from __future__ import annotations
 
+import unicodedata
+
 from app.detection.presidio_engine import EntitySpan
 from app.privacy.outbound_guard import find_value_spans
 
 
-class TokenManager:
+class BatchTokenRegistry:
+    """Request-scoped token assignments shared across documents, never across batches."""
+
     def __init__(self) -> None:
+        self.tokens: dict[tuple[str, str], str] = {}
+        self.counters: dict[str, int] = {}
+        self.managers: list[TokenManager] = []
+
+    @staticmethod
+    def normalize(entity_type: str, value: str) -> str:
+        normalized = unicodedata.normalize("NFC", value)
+        normalized = " ".join(normalized.split())
+        kind = entity_type.upper()
+        if "PHONE" in kind or "MOBILE" in kind:
+            digits = "".join(
+                str(unicodedata.decimal(character))
+                for character in normalized
+                if character.isdecimal()
+            )
+            return ("+" if normalized.lstrip().startswith("+") else "") + digits
+        if kind in {"EMAIL_ADDRESS", "EMAIL"}:
+            return normalized.casefold()
+        if kind in {"PAN", "AADHAAR", "GSTIN", "VOTER_ID", "PASSPORT"}:
+            characters = []
+            for character in normalized:
+                if character.isdecimal():
+                    characters.append(str(unicodedata.decimal(character)))
+                elif character.isalnum():
+                    characters.append(character.upper())
+            return "".join(characters)
+        if kind == "PERSON":
+            return normalized.casefold()
+        return normalized
+
+    def clear(self) -> None:
+        for manager in self.managers:
+            manager.clear()
+        self.managers.clear()
+        self.tokens.clear()
+        self.counters.clear()
+
+
+class TokenManager:
+    def __init__(self, registry: BatchTokenRegistry | None = None) -> None:
         self.mapping: dict[str, str] = {}
+        self.raw_values: set[str] = set()
         self._tokens_by_value: dict[tuple[str, str], str] = {}
         self._counters: dict[str, int] = {}
+        self.registry = registry
+        if registry is not None:
+            registry.managers.append(self)
 
     def token_for(self, entity_type: str, value: str) -> str:
-        key = (entity_type, value)
+        self.raw_values.add(value)
+        key_value = (
+            self.registry.normalize(entity_type, value)
+            if self.registry is not None
+            else value
+        )
+        key = (entity_type, key_value)
         if key in self._tokens_by_value:
             return self._tokens_by_value[key]
-        index = self._counters.get(entity_type, 0) + 1
-        self._counters[entity_type] = index
-        token = f"<{entity_type}_{index}>"
+        if self.registry is not None and key in self.registry.tokens:
+            token = self.registry.tokens[key]
+        else:
+            counters = self.registry.counters if self.registry is not None else self._counters
+            index = counters.get(entity_type, 0) + 1
+            counters[entity_type] = index
+            token = f"<{entity_type}_{index}>"
+            if self.registry is not None:
+                self.registry.tokens[key] = token
         self._tokens_by_value[key] = token
-        self.mapping[token] = value
+        self.mapping.setdefault(token, value)
         return token
+
+    def clear(self) -> None:
+        self.mapping.clear()
+        self.raw_values.clear()
+        self._tokens_by_value.clear()
+        self._counters.clear()
 
     def mask(self, text: str, entities: list[EntitySpan]) -> tuple[str, list[dict]]:
         ordered = sorted(entities, key=lambda item: (item.start, item.end))

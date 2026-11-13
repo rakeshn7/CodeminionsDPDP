@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+import email.utils
 import json
 import logging
+import math
+import re
+import time
+from datetime import datetime, timezone
 
 import httpx
 
@@ -52,6 +58,29 @@ def _safe_error_metadata(response: httpx.Response) -> str:
     return ", ".join(fields)
 
 
+def _rate_limit_delay(response: httpx.Response, attempt: int) -> float:
+    retry_after = response.headers.get("retry-after", "").strip()
+    try:
+        return max(0.0, float(retry_after))
+    except ValueError:
+        if retry_after:
+            try:
+                retry_time = email.utils.parsedate_to_datetime(retry_after)
+                if retry_time.tzinfo is None:
+                    retry_time = retry_time.replace(tzinfo=timezone.utc)
+                return max(0.0, (retry_time - datetime.now(timezone.utc)).total_seconds())
+            except (TypeError, ValueError, OverflowError):
+                pass
+
+    reset = response.headers.get("x-ratelimit-reset-requests", "").strip().lower()
+    match = re.fullmatch(r"(\d+(?:\.\d+)?)(ms|s|m)", reset)
+    if match:
+        amount = float(match.group(1))
+        return amount / 1000 if match.group(2) == "ms" else amount * (60 if match.group(2) == "m" else 1)
+
+    return min(2**attempt, 8)
+
+
 _SYSTEM_PROMPT = (
     "You are a privacy-preserving enterprise assistant. Treat angle-bracket "
     "placeholders such as <PERSON_1> as opaque data. Preserve every placeholder "
@@ -67,6 +96,10 @@ class GroqProvider(LLMProvider):
         self.api_key = settings.groq_api_key
         self.base_url = settings.groq_base_url
         self.model = settings.groq_model
+        self.max_rate_limit_retries = settings.groq_max_rate_limit_retries
+        self.max_rate_limit_wait_seconds = settings.groq_max_rate_limit_wait_seconds
+        self._request_lock = asyncio.Lock()
+        self._rate_limited_until = 0.0
 
     def build_payload(self, sanitized_text: str, task: str) -> dict:
         task_instruction = (
@@ -97,25 +130,56 @@ class GroqProvider(LLMProvider):
             "Content-Type": "application/json",
         }
         try:
-            async with httpx.AsyncClient(timeout=45.0) as client:
-                for attempt in range(2):
-                    response = await client.post(
-                        f"{self.base_url}/chat/completions",
-                        content=serialized_payload.encode("utf-8"),
-                        headers=headers,
+            async with self._request_lock:
+                remaining = self._rate_limited_until - time.monotonic()
+                if remaining > 0:
+                    raise LLMError(
+                        f"Groq is temporarily rate-limiting requests. Try again in about {math.ceil(remaining)} seconds."
                     )
-                    if (
-                        attempt == 0
-                        and response.status_code == 400
-                        and "code=json_validate_failed"
-                        in _safe_error_metadata(response)
-                    ):
-                        _LOGGER.warning(
-                            "Groq returned a JSON validation error; retrying the sanitized request once."
+                self._rate_limited_until = 0.0
+                rate_limit_retries = 0
+                json_retry_used = False
+                async with httpx.AsyncClient(timeout=45.0) as client:
+                    while True:
+                        response = await client.post(
+                            f"{self.base_url}/chat/completions",
+                            content=serialized_payload.encode("utf-8"),
+                            headers=headers,
                         )
-                        continue
-                    response.raise_for_status()
-                    break
+                        if response.status_code == 429:
+                            delay = _rate_limit_delay(response, rate_limit_retries)
+                            self._rate_limited_until = time.monotonic() + delay
+                            if (
+                                rate_limit_retries < self.max_rate_limit_retries
+                                and delay <= self.max_rate_limit_wait_seconds
+                            ):
+                                rate_limit_retries += 1
+                                _LOGGER.warning(
+                                    "Groq rate limit reached; retrying the sanitized request after %.1f seconds (attempt %s/%s).",
+                                    delay,
+                                    rate_limit_retries,
+                                    self.max_rate_limit_retries,
+                                )
+                                await asyncio.sleep(delay)
+                                self._rate_limited_until = 0.0
+                                continue
+                            raise LLMError(
+                                "Groq is temporarily rate-limiting requests. "
+                                f"Try again in about {math.ceil(delay)} seconds."
+                            )
+                        if (
+                            not json_retry_used
+                            and response.status_code == 400
+                            and "code=json_validate_failed"
+                            in _safe_error_metadata(response)
+                        ):
+                            json_retry_used = True
+                            _LOGGER.warning(
+                                "Groq returned a JSON validation error; retrying the sanitized request once."
+                            )
+                            continue
+                        response.raise_for_status()
+                        break
             body = response.json()
             answer = body["choices"][0]["message"]["content"]
             if not isinstance(answer, str) or not answer:

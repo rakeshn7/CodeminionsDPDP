@@ -21,6 +21,7 @@ import ValidationPanel from '../components/ValidationPanel'
 import { sampleDocuments } from '../data/samples'
 import {
   analyzeDocument,
+  analyzeDocumentsBatch,
   getOcrStatus,
   getSafeApiError,
   processRequest,
@@ -39,6 +40,7 @@ export default function PrivacyGateway({ initialWorkflow = 'intelligent_document
 
   // Document review state
   const [documentAnalysis, setDocumentAnalysis] = useState(null)
+  const [batchResults, setBatchResults] = useState(null)
   const [awaitingEditedReview, setAwaitingEditedReview] = useState(false)
   const [ocrDiagnostics, setOcrDiagnostics] = useState(null)
   const [reviewStatus, setReviewStatus] = useState({})
@@ -68,6 +70,7 @@ export default function PrivacyGateway({ initialWorkflow = 'intelligent_document
   }, [])
 
   const handleAnalyzeDocument = async ({
+    files,
     file,
     text,
     filename,
@@ -78,9 +81,17 @@ export default function PrivacyGateway({ initialWorkflow = 'intelligent_document
     setProcessingAction(extractOnly ? 'extract' : 'analyze')
     setError('')
     setDocumentAnalysis(null)
+    setBatchResults(null)
     setReviewStatus({})
     setSelectedFindingIndex(null)
     try {
+      if (files?.length) {
+        setProcessingAction(`batch-${files.length}`)
+        const batch = await analyzeDocumentsBatch({ files, runLlm: requestReview })
+        setBatchResults(batch.results || [])
+        if (!batch.success) setError('No documents could be analyzed. Review the per-document errors below.')
+        return
+      }
       const result = await analyzeDocument({
         file,
         text,
@@ -121,6 +132,7 @@ export default function PrivacyGateway({ initialWorkflow = 'intelligent_document
 
   const resetDocumentAnalysis = () => {
     setDocumentAnalysis(null)
+    setBatchResults(null)
     setEditableText('')
     setAwaitingEditedReview(false)
     setReviewStatus({})
@@ -259,6 +271,94 @@ export default function PrivacyGateway({ initialWorkflow = 'intelligent_document
             onRunLlmChange={setRunLlm}
             onResetAnalysis={resetDocumentAnalysis}
           />
+
+          {batchResults && (
+            <section aria-label="Batch document results" className="space-y-4">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Batch results ({batchResults.length} documents)
+              </h3>
+              {batchResults.map((result) => (
+                <article
+                  key={result.document_id}
+                  className={`overflow-hidden rounded-2xl border bg-white shadow-sm ${
+                    result.status === 'success' ? 'border-slate-200' : 'border-rose-300'
+                  }`}
+                >
+                  <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 p-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900">{result.filename}</h4>
+                      <p className="text-xs text-slate-500">
+                        {result.status === 'success'
+                          ? `Language: ${(result.detected_languages || []).join(', ') || 'Not detected'}`
+                          : 'This document could not be analyzed'}
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      result.status === 'success'
+                        ? 'bg-emerald-50 text-emerald-800'
+                        : 'bg-rose-50 text-rose-800'
+                    }`}>
+                      {result.status === 'success' ? 'Processed' : 'Failed'}
+                    </span>
+                  </header>
+                  {result.status !== 'success' ? (
+                    <p className="p-4 text-sm text-rose-800">{result.error || 'Document processing failed.'}</p>
+                  ) : (
+                    <div className="grid gap-4 p-4 xl:grid-cols-2">
+                      <div className="space-y-3">
+                        <div>
+                          <h5 className="text-sm font-semibold text-slate-800">PII findings</h5>
+                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                            {(result.entities || []).map((entity, index) => (
+                              <li key={`${entity.placeholder}-${index}`}>
+                                {entity.type}: {entity.placeholder}
+                              </li>
+                            ))}
+                            {!result.entities?.length && <li>No PII findings.</li>}
+                          </ul>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-semibold text-slate-800">Validation alerts</h5>
+                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                            {(result.validation_findings || []).map((finding, index) => (
+                              <li key={`${finding.category}-${index}`}>
+                                <strong>{finding.severity}</strong> · {finding.location}: {finding.explanation}
+                              </li>
+                            ))}
+                            {!result.validation_findings?.length && <li>No validation alerts.</li>}
+                          </ul>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-semibold text-slate-800">AI analysis</h5>
+                          <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
+                            {result.llm_analysis?.summary || result.llm_analysis?.error || 'AI analysis was not requested.'}
+                          </p>
+                          {result.llm_analysis?.restored_summary && (
+                            <p className="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                              {result.llm_analysis.restored_summary}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <details className="min-w-0">
+                        <summary className="cursor-pointer text-sm font-semibold text-blue-700">
+                          Inspect this document's extracted content
+                        </summary>
+                        <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-xl bg-slate-50 p-3 text-xs text-slate-700">
+                          {result.extracted_text || 'No text extracted.'}
+                        </pre>
+                        {result.pages?.length > 1 && (
+                          <p className="mt-2 text-xs text-slate-500">
+                            Source page references are included with the extraction.
+                          </p>
+                        )}
+                      </details>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </section>
+          )}
 
           {/* 2. Analysis Results Section */}
           {documentAnalysis && (

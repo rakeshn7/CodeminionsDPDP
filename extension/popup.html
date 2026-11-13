@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DPDP Privacy Gateway</title>
+    <style>
+      body { width: 360px; margin: 0; padding: 16px; color: #172033; font: 14px system-ui, sans-serif; }
+      h1 { margin: 0 0 6px; font-size: 17px; }
+      p { margin: 0 0 12px; color: #596579; font-size: 12px; }
+      textarea { box-sizing: border-box; width: 100%; min-height: 120px; resize: vertical; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font: 12px/1.5 ui-monospace, monospace; }
+      .actions { display: flex; gap: 8px; margin-top: 10px; }
+      button { padding: 8px 10px; border: 0; border-radius: 7px; background: #2563eb; color: white; font-weight: 600; cursor: pointer; }
+      button.secondary { background: #e8eef8; color: #172033; }
+      button:disabled { opacity: .6; cursor: wait; }
+      label { display: block; margin-top: 10px; color: #475569; font-size: 12px; }
+      #status { margin-top: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+      #status.error { color: #b91c1c; }
+      #status pre { max-height: 180px; overflow: auto; padding: 8px; border-radius: 6px; background: #f1f5f9; color: #172033; }
+    </style>
+  </head>
+  <body>
+    <h1>DPDP Privacy Gateway</h1>
+    <p>Only text you select or enter here is sent to your local backend.</p>
+    <textarea id="page-text" placeholder="Select text on a webpage, or paste text here."></textarea>
+    <label><input id="run-llm" type="checkbox"> Request external AI review after local masking</label>
+    <div class="actions">
+      <button id="get-selection" class="secondary" type="button">Use page selection</button>
+      <button id="analyze" type="button">Analyze locally</button>
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -95,4 +95,18 @@ export const analyzeDocument = async ({ file, text, filename, runLlm = true, pro
   return data
 }
 
+export const analyzeDocumentsBatch = async ({ files, runLlm = true, provider = 'configured_provider' }) => {
+  const formData = new FormData()
+  files.forEach((file) => formData.append('files', file))
+  formData.append('provider', provider)
+  formData.append('run_llm', String(runLlm))
+  const { data } = await api.post('/api/documents/analyze-batch', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    timeout: 300000,
+  })
+  return data
+}
+
 export default api

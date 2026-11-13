@@ -421,3 +421,146 @@ def test_document_review_masks_repeated_known_pii_before_guard(tmp_path):
     assert raw_name not in provider.payloads[0]
     assert provider.payloads[0].count("<PERSON_1>") >= 2
     assert response.json()["entity_counts"]["PERSON"] == 2
+
+
+def test_batch_analysis_is_independent_and_reuses_consistent_pii_tokens(tmp_path):
+    class CapturingProvider(MockProvider):
+        def __init__(self):
+            self.payloads = []
+
+        async def complete(self, serialized_payload):
+            import json
+
+            self.payloads.append(serialized_payload)
+            return LLMResult(
+                json.dumps({"summary": "Document <PERSON_1> reviewed.", "findings": []}),
+                self.model,
+            )
+
+    client, gateway = _test_app(tmp_path)
+    provider = CapturingProvider()
+    gateway.providers["groq"] = provider
+    aadhaar = "9876 5432 1098"
+    first = (
+        "ALPHA_ONLY applicant Rahul Sharma, phone +91 98765 43210, "
+        f"email Rahul@example.com, PAN ABCPK1234F, Aadhaar {aadhaar}."
+    )
+    second = (
+        "बीटा_ONLY आवेदक Rahul Sharma, phone +91-98765-43210, "
+        f"email rahul@EXAMPLE.com, PAN ABCPK1234F, Aadhaar {aadhaar}."
+    )
+
+    response = client.post(
+        "/api/documents/analyze-batch",
+        files=[
+            ("files", ("first.txt", first.encode(), "text/plain")),
+            ("files", ("second.txt", second.encode(), "text/plain")),
+        ],
+    )
+
+    assert response.status_code == 200
+    results = response.json()["results"]
+    assert len(provider.payloads) == 2
+    assert results[0]["document_id"] != results[1]["document_id"]
+    assert results[0]["filename"] == "first.txt"
+    assert results[1]["filename"] == "second.txt"
+    assert "बीटा_ONLY" not in results[0]["extracted_text"]
+    assert "ALPHA_ONLY" not in results[1]["extracted_text"]
+    assert "Hindi" in results[1]["detected_languages"]
+    for kind in ("PERSON", "PAN", "AADHAAR"):
+        first_tokens = {
+            entity["placeholder"]
+            for entity in results[0]["entities"]
+            if entity["type"] == kind
+        }
+        second_tokens = {
+            entity["placeholder"]
+            for entity in results[1]["entities"]
+            if entity["type"] == kind
+        }
+        assert first_tokens.intersection(second_tokens), kind
+    for type_fragment in ("PHONE", "EMAIL"):
+        first_tokens = {
+            entity["placeholder"]
+            for entity in results[0]["entities"]
+            if type_fragment in entity["type"]
+        }
+        second_tokens = {
+            entity["placeholder"]
+            for entity in results[1]["entities"]
+            if type_fragment in entity["type"]
+        }
+        assert first_tokens.intersection(second_tokens), type_fragment
+
+    combined_payload = "".join(provider.payloads)
+    for raw_value in (
+        "Rahul Sharma",
+        "98765 43210",
+        "Rahul@example.com",
+        "ABCPK1234F",
+        aadhaar,
+    ):
+        assert raw_value not in combined_payload
+
+
+def test_batch_continues_when_one_document_has_unsupported_extension(tmp_path):
+    client, _ = _test_app(tmp_path)
+    response = client.post(
+        "/api/documents/analyze-batch",
+        files=[
+            ("files", ("valid.txt", b"Loan record for Rahul Sharma.", "text/plain")),
+            ("files", ("unsupported.exe", b"not a supported document", "application/octet-stream")),
+        ],
+        data={"run_llm": "false"},
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert result["successful_files"] == 1
+    assert result["failed_files"] == 1
+    assert result["results"][0]["status"] == "success"
+    assert result["results"][1]["status"] == "error"
+    assert "Unsupported file format" in result["results"][1]["error"]
+
+
+def test_batch_token_registry_is_not_shared_between_requests(tmp_path):
+    client, _ = _test_app(tmp_path)
+    upload = [("files", ("person.txt", b"Rahul Sharma applied for a loan.", "text/plain"))]
+    first = client.post(
+        "/api/documents/analyze-batch", files=upload, data={"run_llm": "false"}
+    ).json()
+    second = client.post(
+        "/api/documents/analyze-batch", files=upload, data={"run_llm": "false"}
+    ).json()
+    assert first["results"][0]["entities"][0]["placeholder"] == "<PERSON_1>"
+    assert second["results"][0]["entities"][0]["placeholder"] == "<PERSON_1>"
+
+
+def test_simultaneous_batch_requests_do_not_share_token_registries(tmp_path):
+    import httpx
+
+    client, _ = _test_app(tmp_path)
+
+    async def send_batches():
+        transport = httpx.ASGITransport(app=client.app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as api:
+            return await asyncio.gather(
+                api.post(
+                    "/api/documents/analyze-batch",
+                    files=[("files", ("rahul.txt", b"Rahul Sharma applied.", "text/plain"))],
+                    data={"run_llm": "false"},
+                ),
+                api.post(
+                    "/api/documents/analyze-batch",
+                    files=[("files", ("priya.txt", b"Priya Nair applied.", "text/plain"))],
+                    data={"run_llm": "false"},
+                ),
+            )
+
+    first, second = asyncio.run(send_batches())
+    assert first.status_code == second.status_code == 200
+    first_result = first.json()["results"][0]
+    second_result = second.json()["results"][0]
+    assert first_result["entities"][0]["placeholder"] == "<PERSON_1>"
+    assert second_result["entities"][0]["placeholder"] == "<PERSON_1>"
+    assert first_result["extracted_text"] == "Rahul Sharma applied."
+    assert second_result["extracted_text"] == "Priya Nair applied."

@@ -17,7 +17,7 @@ from app.llm.provider import GroqProvider, serialize_payload
 from app.nlp.language import detect_document_language
 from app.privacy.outbound_guard import verify_outbound
 from app.privacy.reinsertion import reinsert
-from app.privacy.token_manager import TokenManager
+from app.privacy.token_manager import BatchTokenRegistry, TokenManager
 from app.validation.validator import validate_document_data
 
 
@@ -200,6 +200,7 @@ class Gateway:
         warnings: list[str] | None = None,
         provider_name: str | None = None,
         run_llm: bool = True,
+        token_registry: BatchTokenRegistry | None = None,
     ) -> dict:
         t_start = time.perf_counter()
         request_id = str(uuid.uuid4())
@@ -229,10 +230,11 @@ class Gateway:
         det_latency = (time.perf_counter() - t_det_start) * 1000
 
         # 3. PII Masking
-        manager = TokenManager()
+        manager = TokenManager(token_registry)
         sanitized_text, masked_entities = manager.mask(text, entities)
         entity_counts = dict(Counter(item["type"] for item in masked_entities))
-        self._save_mapping(request_id, manager.mapping)
+        if token_registry is None:
+            self._save_mapping(request_id, manager.mapping)
 
         # Summary of placeholders without revealing raw values
         placeholders_summary = {
@@ -315,7 +317,7 @@ class Gateway:
             and not unsupported_languages
         ):
             # Check outbound guard to ensure zero raw PII leaks to LLM
-            guard = verify_outbound(sanitized_text, list(manager.mapping.values()))
+            guard = verify_outbound(sanitized_text, list(manager.raw_values))
             if not guard.allowed:
                 self.audit.save_security_event(
                     request_id,
@@ -422,6 +424,7 @@ class Gateway:
         filename: str,
         provider_name: str | None = None,
         run_llm: bool = True,
+        token_registry: BatchTokenRegistry | None = None,
     ) -> dict:
         t_ext_start = time.perf_counter()
         ext_res = extract_document(file_bytes, filename)
@@ -484,6 +487,7 @@ class Gateway:
             warnings=ext_res.warnings,
             provider_name=provider_name,
             run_llm=run_llm,
+            token_registry=token_registry,
         )
         result["metrics"]["extraction_latency_ms"] = round(ext_latency, 2)
         result["metrics"]["total_latency_ms"] = round(result["metrics"]["total_latency_ms"] + ext_latency, 2)

@@ -434,6 +434,105 @@ def test_groq_provider_retries_json_validation_error_once(monkeypatch, caplog):
     assert "retrying the sanitized request once" in caplog.text
 
 
+def test_groq_provider_retries_rate_limit_after_retry_after(monkeypatch, caplog):
+    import asyncio
+
+    import httpx
+
+    provider = GroqProvider(
+        Settings(
+            groq_api_key="test-key-never-sent",
+            groq_max_rate_limit_retries=1,
+        )
+    )
+    calls = 0
+    waits = []
+
+    async def fake_sleep(delay):
+        waits.append(delay)
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            nonlocal calls
+            calls += 1
+            request = httpx.Request("POST", url)
+            if calls == 1:
+                return httpx.Response(
+                    429,
+                    request=request,
+                    headers={"retry-after": "0.25"},
+                )
+            return httpx.Response(
+                200,
+                request=request,
+                json={
+                    "model": provider.model,
+                    "choices": [{"message": {"content": "Review completed."}}],
+                },
+            )
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setattr("app.llm.provider.asyncio.sleep", fake_sleep)
+
+    result = asyncio.run(provider.complete('{"messages":[]}'))
+
+    assert calls == 2
+    assert waits == [0.25]
+    assert result.text == "Review completed."
+    assert "Groq rate limit reached" in caplog.text
+
+
+def test_groq_provider_cools_down_after_rate_limit(monkeypatch):
+    import asyncio
+
+    import httpx
+    import pytest
+
+    provider = GroqProvider(
+        Settings(
+            groq_api_key="test-key-never-sent",
+            groq_max_rate_limit_retries=0,
+        )
+    )
+    calls = 0
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            nonlocal calls
+            calls += 1
+            return httpx.Response(
+                429,
+                request=httpx.Request("POST", url),
+                headers={"retry-after": "5"},
+            )
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+
+    with pytest.raises(LLMError, match="rate-limiting"):
+        asyncio.run(provider.complete('{"messages":[]}'))
+    with pytest.raises(LLMError, match="about 5 seconds"):
+        asyncio.run(provider.complete('{"messages":[]}'))
+    assert calls == 1
+
+
 def test_large_input_limit_is_enforced(tmp_path):
     settings = Settings(
         database_url=f"sqlite:///{tmp_path / 'audit.db'}",

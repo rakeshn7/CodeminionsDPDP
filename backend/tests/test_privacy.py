@@ -10,7 +10,7 @@ from app.detection.ner_engine import GlinerEngine
 from app.detection.presidio_engine import EntitySpan, PresidioDetectionEngine
 from app.privacy.outbound_guard import verify_outbound
 from app.privacy.reinsertion import reinsert
-from app.privacy.token_manager import TokenManager
+from app.privacy.token_manager import BatchTokenRegistry, TokenManager
 
 
 def test_detects_all_indian_identifier_patterns_and_address():
@@ -112,6 +112,33 @@ def test_masks_repeated_names_and_identity_values_consistently():
     }
     assert "Rahul Sharma" not in masked
     assert len(public) == 4
+
+
+def test_batch_registry_normalizes_exact_values_without_cross_type_collisions():
+    registry = BatchTokenRegistry()
+    first = TokenManager(registry)
+    second = TokenManager(registry)
+
+    person = first.token_for("PERSON", "Rahul  Sharma")
+    assert second.token_for("PERSON", "rahul Sharma") == person
+    phone = first.token_for("PHONE_NUMBER", "+91 98765 43210")
+    assert second.token_for("PHONE_NUMBER", "+91-98765-43210") == phone
+    assert first.token_for("EMAIL_ADDRESS", "Rahul@Example.com") == second.token_for(
+        "EMAIL_ADDRESS", "rahul@example.COM"
+    )
+    assert first.token_for("PAN", "abc pk-1234f") == second.token_for("PAN", "ABCPK1234F")
+    indic_aadhaar = first.token_for("AADHAAR", "१२३४ ५६७८ ९०१२")
+    assert second.token_for("AADHAAR", "1234-5678-9012") == indic_aadhaar
+    assert second.token_for("AADHAAR", "१२३४ ५६७८ ९०१३") != indic_aadhaar
+
+    different_person = second.token_for("PERSON", "Priya Nair")
+    different_phone = second.token_for("PHONE_NUMBER", "+91 91234 56789")
+    assert person != different_person
+    assert phone != different_phone
+    assert person != first.token_for("EMAIL_ADDRESS", "Rahul Sharma")
+    registry.clear()
+    assert not registry.tokens
+    assert not first.mapping and not second.mapping
 
 
 def test_mask_replaces_repeated_detected_value_even_when_ner_missed_occurrence():

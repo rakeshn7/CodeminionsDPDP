@@ -342,16 +342,6 @@ class Gateway:
                 if llm_analysis.get("status") == "success":
                     summary = llm_analysis.get("summary")
                     if isinstance(summary, str):
-                        missing_tokens = [
-                            token
-                            for token in manager.mapping
-                            if token not in summary
-                        ]
-                        if missing_tokens:
-                            summary = (
-                                f"{summary.rstrip()}\n\n"
-                                f"Protected details: {', '.join(missing_tokens)}"
-                            )
                         restoration = reinsert(summary, manager.mapping)
                         llm_analysis.update(
                             {

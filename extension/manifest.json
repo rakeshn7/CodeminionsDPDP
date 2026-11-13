@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "DPDP Privacy Gateway",
   "version": "0.1.0",
-  "description": "Send selected webpage text to the local DPDP privacy gateway.",
+  "description": "Analyze pasted text or explicitly selected webpage text using your local DPDP privacy gateway.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["http://127.0.0.1:8000/*"],
   "action": {

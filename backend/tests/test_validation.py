@@ -66,6 +66,23 @@ def test_full_name_field_flags_common_item_words_and_addresses():
         )
 
 
+def test_inline_name_declaration_flags_items_and_accepts_person_names():
+    item_findings = validate_document_data("My name is laptop.")
+    person_findings = validate_document_data("My name is Rahul Sharma.")
+
+    assert any(
+        finding.category == "PERSON_NAME"
+        and finding.severity == "ERROR"
+        and finding.field == "My Name Is"
+        for finding in item_findings
+    )
+    assert not [
+        finding
+        for finding in person_findings
+        if finding.category == "PERSON_NAME"
+    ]
+
+
 def test_full_name_field_flags_spacy_classified_locations_and_products():
     classifier = lambda value: {
         "Bengaluru": "LOCATION",

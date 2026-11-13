@@ -3,32 +3,111 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <title>DPDP Privacy Gateway</title>
     <style>
-      body { width: 360px; margin: 0; padding: 16px; color: #172033; font: 14px system-ui, sans-serif; }
-      h1 { margin: 0 0 6px; font-size: 17px; }
-      p { margin: 0 0 12px; color: #596579; font-size: 12px; }
-      textarea { box-sizing: border-box; width: 100%; min-height: 120px; resize: vertical; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font: 12px/1.5 ui-monospace, monospace; }
-      .actions { display: flex; gap: 8px; margin-top: 10px; }
-      button { padding: 8px 10px; border: 0; border-radius: 7px; background: #2563eb; color: white; font-weight: 600; cursor: pointer; }
-      button.secondary { background: #e8eef8; color: #172033; }
-      button:disabled { opacity: .6; cursor: wait; }
-      label { display: block; margin-top: 10px; color: #475569; font-size: 12px; }
-      #status { margin-top: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
-      #status.error { color: #b91c1c; }
-      #status pre { max-height: 180px; overflow: auto; padding: 8px; border-radius: 6px; background: #f1f5f9; color: #172033; }
+      :root {
+        color-scheme: light;
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: #172033;
+        background: #f8fafc;
+      }
+
+      * { box-sizing: border-box; }
+      body { width: 430px; max-height: 640px; margin: 0; overflow-y: auto; }
+      header { padding: 18px 20px 14px; color: white; background: #123a67; }
+      header h1 { margin: 0; font-size: 18px; line-height: 1.25; }
+      header p { margin: 5px 0 0; color: #d7e5f5; font-size: 12px; }
+      main { display: grid; gap: 12px; padding: 14px; }
+      .panel { padding: 13px; border: 1px solid #dbe3ee; border-radius: 12px; background: #fff; }
+      label { display: block; margin-bottom: 6px; color: #334155; font-size: 12px; font-weight: 650; }
+      textarea {
+        display: block;
+        width: 100%;
+        min-height: 135px;
+        resize: vertical;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #172033;
+        background: #fff;
+        font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+      textarea:focus { border-color: #2563eb; outline: 3px solid #dbeafe; }
+      .privacy-note { margin: 8px 0 0; color: #64748b; font-size: 11px; }
+      .checkbox { display: flex; align-items: flex-start; gap: 7px; margin-top: 11px; color: #475569; font-size: 12px; font-weight: 450; }
+      .checkbox input { margin: 3px 0 0; accent-color: #1d4ed8; }
+      .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      button { min-height: 35px; padding: 7px 11px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+      button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+      button:disabled { cursor: wait; opacity: .65; }
+      .primary { display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: white; background: #1d4ed8; }
+      .secondary { color: #1e3a5f; border-color: #cbd5e1; background: white; }
+      .status { min-height: 0; color: #475569; font-size: 12px; }
+      .status:empty { display: none; }
+      .status.error { padding: 9px 10px; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; background: #fef2f2; }
+      .results { display: grid; gap: 10px; }
+      .results[hidden] { display: none; }
+      .result-card { min-width: 0; padding: 11px; border: 1px solid #dbe3ee; border-radius: 10px; background: white; }
+      .result-card h2 { margin: 0 0 7px; color: #1e3a5f; font-size: 13px; }
+      .result-card p { margin: 0; color: #334155; font-size: 12px; overflow-wrap: anywhere; }
+      .result-card pre { max-height: 190px; margin: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #334155; font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+      .result-card ul { display: grid; gap: 5px; margin: 0; padding-left: 18px; color: #334155; font-size: 12px; overflow-wrap: anywhere; }
+      .muted { color: #64748b !important; }
+      .badge { display: inline-block; margin: 0 5px 3px 0; padding: 2px 7px; border-radius: 99px; color: #1e3a5f; background: #eff6ff; font-size: 11px; }
+      .spinner { width: 13px; height: 13px; border: 2px solid #ffffff80; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+      .spinner[hidden] { display: none; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
     </style>
   </head>
   <body>
-    <h1>DPDP Privacy Gateway</h1>
-    <p>Only text you select or enter here is sent to your local backend.</p>
-    <textarea id="page-text" placeholder="Select text on a webpage, or paste text here."></textarea>
-    <label><input id="run-llm" type="checkbox"> Request external AI review after local masking</label>
-    <div class="actions">
-      <button id="get-selection" class="secondary" type="button">Use page selection</button>
-      <button id="analyze" type="button">Analyze locally</button>
-    </div>
-    <div id="status" role="status" aria-live="polite"></div>
+    <header>
+      <h1>DPDP Privacy Gateway</h1>
+      <p>Analyze pasted text locally before optional protected AI review.</p>
+    </header>
+    <main>
+      <section class="panel" aria-labelledby="input-label">
+        <label id="input-label" for="page-text">Webpage text</label>
+        <textarea id="page-text" maxlength="100000" placeholder="Paste text to analyze. Page selection is read only when you choose the button below." spellcheck="false"></textarea>
+        <p class="privacy-note">Text is sent to your local backend only when you press Analyze. It is not saved by this extension.</p>
+        <label class="checkbox">
+          <input id="run-llm" type="checkbox">
+          <span>Request optional external AI review (the backend masks PII first)</span>
+        </label>
+        <div class="actions">
+          <button id="analyze" class="primary" type="button">
+            <span id="spinner" class="spinner" aria-hidden="true" hidden></span>
+            <span id="analyze-label">Analyze</span>
+          </button>
+          <button id="get-selection" class="secondary" type="button">Use selected page text</button>
+          <button id="clear" class="secondary" type="button">Clear</button>
+        </div>
+      </section>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <section id="results" class="results" aria-label="Analysis results" hidden>
+        <section class="result-card">
+          <h2>Detected languages</h2>
+          <div id="languages"></div>
+        </section>
+        <section class="result-card">
+          <h2>Detected PII (values masked)</h2>
+          <ul id="entities"></ul>
+        </section>
+        <section class="result-card">
+          <h2>Sanitized text</h2>
+          <pre id="sanitized"></pre>
+        </section>
+        <section class="result-card">
+          <h2>Validation results</h2>
+          <ul id="validation"></ul>
+        </section>
+        <section class="result-card">
+          <h2>AI analysis</h2>
+          <div id="ai-analysis"></div>
+        </section>
+      </section>
+    </main>
     <script src="popup.js"></script>
   </body>
 </html>

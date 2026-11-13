@@ -93,6 +93,46 @@ def test_identifiers_keep_exact_unicode_safe_offsets():
     assert text[match.start : match.end] == "ABCPK1234F"
 
 
+def test_person_detection_rejects_item_candidates_but_keeps_valid_names():
+    from types import SimpleNamespace
+
+    text = (
+        "My name is laptop. My name is apple. My name is water bottle. "
+        "My name is Rahul Sharma."
+    )
+
+    class FakeGliner:
+        _load_error = None
+
+        def detect(self, value):
+            assert value == text
+            results = []
+            for candidate in ("laptop", "apple", "water bottle", "Rahul Sharma"):
+                start = text.index(candidate)
+                results.append(
+                    SimpleNamespace(
+                        entity_type="PERSON",
+                        start=start,
+                        end=start + len(candidate),
+                        score=0.9,
+                        source="gliner",
+                    )
+                )
+            return results, None
+
+    detector = object.__new__(PresidioDetectionEngine)
+    detector._analyzer = None
+    detector.gliner = FakeGliner()
+
+    detected = detector.detect(text)
+
+    assert [
+        text[item.start : item.end]
+        for item in detected
+        if item.entity_type == "PERSON"
+    ] == ["Rahul Sharma"]
+
+
 def test_masks_repeated_names_and_identity_values_consistently():
     text = "Rahul Sharma has PAN ABCPD1234F; Rahul Sharma used PAN ABCPD1234F."
     entities = [

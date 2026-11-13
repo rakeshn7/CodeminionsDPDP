@@ -336,6 +336,11 @@ _NAME_FIELD_EXTRACTOR = re.compile(
     r"\s*(?:[:\-=\t|,]|\s{2,}|\s(?=[A-Za-z0-9#\u0900-\u097F\u0C80-\u0CFF]))\s*(?P<value>[^\r\n;]+)"
 )
 
+_INLINE_NAME_EXTRACTOR = re.compile(
+    r"(?i)\b(?P<field>(?:my|his|her|their|applicant(?:'s)?)\s+name\s+is)\s+"
+    r"(?P<value>[^,.;\r\n]+)"
+)
+
 
 def _classify_name_field_candidate(
     value: str,
@@ -441,6 +446,14 @@ def _classify_name_field_candidate(
     return False, "", "", ""
 
 
+def non_person_candidate_type(value: str) -> str | None:
+    """Return a known non-person category for obvious item/location name candidates."""
+    is_error, error_type, _, _ = _classify_name_field_candidate(value)
+    if is_error and error_type in {"ADDRESS", "LOCATION", "ITEM", "OCCUPATION", "ORG"}:
+        return error_type
+    return None
+
+
 def _validate_full_names(
     text: str,
     pages: list[dict[str, Any]] | None,
@@ -448,7 +461,19 @@ def _validate_full_names(
 ) -> list[ValidationFinding]:
     findings: list[ValidationFinding] = []
 
-    for match in _NAME_FIELD_EXTRACTOR.finditer(text):
+    name_matches = sorted(
+        [
+            *_NAME_FIELD_EXTRACTOR.finditer(text),
+            *_INLINE_NAME_EXTRACTOR.finditer(text),
+        ],
+        key=lambda match: match.start("value"),
+    )
+    seen_name_spans: set[tuple[int, int]] = set()
+    for match in name_matches:
+        span = match.span("value")
+        if span in seen_name_spans:
+            continue
+        seen_name_spans.add(span)
         raw_val = match.group("value").strip(" \t.:,\"'")
         if not raw_val:
             continue

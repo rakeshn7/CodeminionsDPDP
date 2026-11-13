@@ -9,6 +9,7 @@ from app.detection.india_recognizers import (
     detect_india_patterns,
 )
 from app.detection.ner_engine import GlinerEngine
+from app.validation.validator import non_person_candidate_type
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -162,6 +163,10 @@ class PresidioDetectionEngine:
             item
             for item in candidates
             if not self._is_person_label(text, item)
+            and not (
+                item.entity_type == "PERSON"
+                and non_person_candidate_type(text[item.start : item.end]) is not None
+            )
         ]
         return self._resolve_overlaps(candidates, len(text), text)
 

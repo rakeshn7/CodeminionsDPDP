@@ -149,13 +149,13 @@ def test_analyze_document_json_endpoint(tmp_path):
     assert data["llm_analysis"]["status"] == "success"
     summary = data["llm_analysis"]["summary"]
     restored_summary = data["llm_analysis"]["restored_summary"]
-    assert "<PERSON_1>" in summary
-    assert "<PAN_1>" in summary
+    assert summary == "Document analyzed for testing."
+    assert "Protected details:" not in summary
+    assert data["llm_analysis"]["restoration"]["missing"]
+    assert "<PERSON_1>" not in restored_summary
+    assert "<PAN_1>" not in restored_summary
     assert "Rahul Sharma" not in summary
     assert "ABCPK1234F" not in summary
-    assert "Rahul Sharma" in restored_summary
-    assert "ABCPK1234F" in restored_summary
-    assert data["llm_analysis"]["restoration"]["missing"] == []
     assert "mapping" not in data["llm_analysis"]
 
 

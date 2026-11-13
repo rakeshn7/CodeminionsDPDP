@@ -89,3 +89,23 @@ Aadhaar checks enforce the 12-digit format, valid leading digit range, and
 reject degenerate repeated-digit values; they do not prove that a number was
 issued by UIDAI. The API only masks detections, and is not an identity
 verification service.
+
+## Document review coverage
+
+The upload path extracts selectable text from PDF, DOCX, TXT, CSV, XLSX,
+PPTX, Markdown, JSON, and HTML files, and OCRs JPG, JPEG, PNG, WEBP, BMP, and
+TIFF images and scanned PDF pages when Tesseract is available. Mixed PDFs are
+handled page by page so scanned pages are not skipped just because another
+page contains selectable text. Legacy DOC/XLS/PPT and DOCX/PPTX embedded-image
+text are not currently extracted; embedded images are reported as a limitation.
+
+Local language and PII coverage is validated for English, Hindi (Devanagari),
+and Kannada. Other detected writing systems remain available for local text
+review, but external review is skipped because sending text with unvalidated
+PII detection could expose personal information. Latin-script language
+identification is heuristic and cannot reliably distinguish every language.
+OCR accuracy depends on installed Tesseract language packs. Always verify
+extracted text, especially scanned pages and tables. This demo cannot guarantee
+correct extraction, classification, or conclusions for every document,
+language, or layout; the provider is instructed to use only document evidence
+and state uncertainty.

@@ -114,6 +114,40 @@ def test_masks_repeated_names_and_identity_values_consistently():
     assert len(public) == 4
 
 
+def test_mask_replaces_repeated_detected_value_even_when_ner_missed_occurrence():
+    text = "Applicant Asha Nair. Asha Nair applied again."
+    start = text.index("Asha Nair")
+    manager = TokenManager()
+
+    sanitized, public = manager.mask(
+        text,
+        [EntitySpan("PERSON", start, start + len("Asha Nair"), 0.95, "test")],
+    )
+
+    assert sanitized == "Applicant <PERSON_1>. <PERSON_1> applied again."
+    assert len(public) == 2
+    assert manager.mapping == {"<PERSON_1>": "Asha Nair"}
+    assert verify_outbound(sanitized, list(manager.mapping.values())).allowed
+
+
+def test_mask_preserves_case_variants_as_separate_restorable_tokens():
+    text = "Applicant Asha Nair. ASHA NAIR applied again."
+    start = text.index("Asha Nair")
+    manager = TokenManager()
+
+    sanitized, _ = manager.mask(
+        text,
+        [EntitySpan("PERSON", start, start + len("Asha Nair"), 0.95, "test")],
+    )
+
+    assert sanitized == "Applicant <PERSON_1>. <PERSON_2> applied again."
+    assert manager.mapping == {
+        "<PERSON_1>": "Asha Nair",
+        "<PERSON_2>": "ASHA NAIR",
+    }
+    assert verify_outbound(sanitized, list(manager.mapping.values())).allowed
+
+
 def test_distinct_people_receive_distinct_tokens():
     text = "Asha met Ravi."
     entities = [

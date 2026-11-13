@@ -6,3 +6,34 @@ backend/data/
 .env
 .env.*
 !.env.example
+
+# Python environments, bytecode, and test caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# JavaScript dependencies and generated builds
+node_modules/
+dist/
+dist-ssr/
+build/
+
+# Local databases, uploads, and OCR language data
+*.db
+*.sqlite
+*.sqlite3
+*.traineddata
+backend/data/
+
+# Generated evaluation output
+/dataset/ground_truth.json
+/dataset/synthetic_documents.csv
+/dataset/synthetic_documents.json
+/evaluation/results.json
+/frontend/public/evaluation-results.json

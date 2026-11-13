@@ -17,6 +17,14 @@ def _value_pattern(value: str) -> re.Pattern[str]:
     return re.compile(left + escaped + right, re.IGNORECASE)
 
 
+def find_value_spans(text: str, value: str) -> list[tuple[int, int]]:
+    """Find exact, case-insensitive value occurrences using the guard's boundaries."""
+    candidate = value.strip()
+    if not candidate:
+        return []
+    return [match.span() for match in _value_pattern(candidate).finditer(text)]
+
+
 def verify_outbound(serialized_payload: str, known_values: list[str]) -> GuardResult:
     """Reject exact known values while avoiding substring matches in larger words."""
     leaked = []

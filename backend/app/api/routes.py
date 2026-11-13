@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import hmac
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, UploadFile
 
+from app.extraction.extractor import MAX_FILE_SIZE_BYTES
+from app.extraction.ocr import get_ocr_diagnostics
 from app.llm.base import LLMError
 from app.schemas.request_response import (
     AuditListResponse,
     AuditResponse,
     DetectResponse,
+    DocumentAnalyzeResponse,
     GatewayRequest,
     HealthResponse,
     MaskResponse,
@@ -125,6 +128,82 @@ async def list_audit(
 @router.get("/api/metrics", response_model=MetricsResponse)
 async def metrics(gateway: Gateway = Depends(get_gateway)) -> MetricsResponse:
     return gateway.audit.metrics()
+
+
+@router.post("/api/documents/analyze", response_model=DocumentAnalyzeResponse)
+async def analyze_document_endpoint(
+    request: Request,
+    gateway: Gateway = Depends(get_gateway),
+) -> DocumentAnalyzeResponse:
+    content_type = request.headers.get("content-type", "")
+
+    # Handle multipart/form-data (file upload or form fields)
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        uploaded_file = form.get("file")
+        text_field = form.get("text")
+        provider_name = form.get("provider") or "configured_provider"
+        run_llm_val = form.get("run_llm")
+        run_llm = True if run_llm_val is None else str(run_llm_val).lower() in {"1", "true", "yes"}
+
+        if uploaded_file and hasattr(uploaded_file, "read"):
+            file_bytes = await uploaded_file.read()
+            filename = getattr(uploaded_file, "filename", "uploaded_document") or "uploaded_document"
+            if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+                raise HTTPException(status_code=413, detail="Uploaded file exceeds server size limits.")
+            return await gateway.analyze_file(
+                file_bytes=file_bytes,
+                filename=filename,
+                provider_name=str(provider_name),
+                run_llm=run_llm,
+            )
+
+        if text_field and isinstance(text_field, str):
+            if len(text_field) > gateway.settings.max_input_chars:
+                raise HTTPException(status_code=413, detail="text exceeds configured input limit.")
+            return await gateway.analyze_document(
+                text=text_field,
+                filename=str(form.get("filename") or "document.txt"),
+                file_type="txt",
+                file_size_bytes=len(text_field.encode("utf-8")),
+                provider_name=str(provider_name),
+                run_llm=run_llm,
+            )
+
+        raise HTTPException(
+            status_code=422,
+            detail="Either a 'file' upload or 'text' content must be provided.",
+        )
+
+    # Handle application/json
+    try:
+        body = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid request body.") from exc
+
+    raw_text = str(body.get("text", "")).strip()
+    if not raw_text:
+        raise HTTPException(status_code=422, detail="Document text must not be empty.")
+    if len(raw_text) > gateway.settings.max_input_chars:
+        raise HTTPException(status_code=413, detail="text exceeds configured input limit.")
+
+    filename = str(body.get("filename", "document.txt"))
+    provider = body.get("provider") or "configured_provider"
+    run_llm = bool(body.get("run_llm", True))
+
+    return await gateway.analyze_document(
+        text=raw_text,
+        filename=filename,
+        file_type="txt",
+        file_size_bytes=len(raw_text.encode("utf-8")),
+        provider_name=provider,
+        run_llm=run_llm,
+    )
+
+
+@router.get("/api/ocr/status")
+async def ocr_status_endpoint() -> dict:
+    return get_ocr_diagnostics()
 
 
 @router.get("/health", response_model=HealthResponse)

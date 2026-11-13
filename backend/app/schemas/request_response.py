@@ -45,6 +45,12 @@ class MetricsResponse(BaseModel):
     leakage_blocked: int
     failed_requests: int
     average_processing_latency_ms: float
+    total_pii_detected: int = 0
+    documents_with_errors: int = 0
+    pii_by_category: list[dict[str, Any]] = Field(default_factory=list)
+    request_trend: list[dict[str, Any]] = Field(default_factory=list)
+    language_distribution: dict[str, int] = Field(default_factory=dict)
+    risk_distribution: dict[str, int] = Field(default_factory=dict)
 
 
 class PresidioStatus(BaseModel):
@@ -127,3 +133,80 @@ class AuditListResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: Literal["ok"]
     detection: DetectionStatus
+
+
+class ValidationFindingResponse(BaseModel):
+    category: str
+    severity: str
+    location: str
+    field: str
+    masked_value: str
+    explanation: str
+    suggestion: str
+    confidence: float
+
+
+class ValidationSummaryResponse(BaseModel):
+    errors: int
+    warnings: int
+    info: int
+    total: int
+
+
+class LLMFindingResponse(BaseModel):
+    category: str
+    severity: str
+    location: str
+    explanation: str
+    suggestion: str
+    confidence: float
+
+
+class LLMAnalysisResponse(BaseModel):
+    status: str
+    summary: str | None = None
+    restored_summary: str | None = None
+    restoration: RestorationResponse | None = None
+    findings: list[LLMFindingResponse] = Field(default_factory=list)
+    error: str | None = None
+    model: str | None = None
+
+
+class LanguageProfileResponse(BaseModel):
+    primary_language: str
+    detected_languages: list[str]
+    is_mixed: bool
+    scripts: dict[str, float]
+    confidence: float
+    notes: str | None = None
+
+
+class DocumentAnalyzeResponse(BaseModel):
+    request_id: str
+    status: str
+    filename: str
+    file_type: str
+    file_size_bytes: int
+    extraction_status: str
+    page_count: int
+    pages: list[dict[str, Any]] = Field(default_factory=list)
+    detected_languages: list[str]
+    primary_language: str
+    is_mixed_language: bool
+    language_profile: LanguageProfileResponse
+    extracted_text: str
+    sanitized_text: str
+    entities: list[EntityResponse]
+    entity_counts: dict[str, int]
+    placeholders_summary: dict[str, str] = Field(default_factory=dict)
+    validation_findings: list[ValidationFindingResponse] = Field(default_factory=list)
+    validation_summary: ValidationSummaryResponse
+    llm_analysis: LLMAnalysisResponse
+    overall_risk: str
+    risk_score: float
+    risk_factors: list[str] = Field(default_factory=list)
+    metrics: dict[str, float] = Field(default_factory=dict)
+    ocr_used: bool = False
+    ocr_status: dict[str, Any] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    error: str | None = None

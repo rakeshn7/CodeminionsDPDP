@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 
@@ -8,6 +9,8 @@ from app.detection.india_recognizers import (
     detect_india_patterns,
 )
 from app.detection.ner_engine import GlinerEngine
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -30,6 +33,13 @@ class PresidioDetectionEngine:
         "PIN CODE",
         "VOTER",
         "VOTER ID",
+        "EMAIL",
+        "EMAIL ADDRESS",
+        "PHONE",
+        "PHONE NUMBER",
+        "BANK ACCOUNT",
+        "DOB",
+        "DATE OF BIRTH",
     }
 
     def __init__(self, spacy_model: str, gliner: GlinerEngine) -> None:
@@ -74,6 +84,30 @@ class PresidioDetectionEngine:
             "gliner": self.gliner.status(),
         }
 
+    def classify_name_value(self, value: str) -> str | None:
+        """Classify non-person entities in a name field using local spaCy."""
+        if self._analyzer is None or not value.strip():
+            return None
+        try:
+            nlp = self._analyzer.nlp_engine.nlp.get("en")
+            if nlp is None:
+                return None
+            doc = nlp(value)
+            labels = {entity.label_ for entity in doc.ents}
+        except Exception as exc:
+            _LOGGER.warning("Local name-field classification unavailable (%s)", type(exc).__name__)
+            return None
+
+        if labels.intersection({"GPE", "LOC", "LOCATION"}):
+            return "LOCATION"
+        if labels.intersection({"FAC"}):
+            return "ADDRESS"
+        if labels.intersection({"PRODUCT"}):
+            return "PRODUCT"
+        if labels.intersection({"ORG"}):
+            return "ORG"
+        return None
+
     def detect(self, text: str) -> list[EntitySpan]:
         candidates: list[EntitySpan] = []
         if self._analyzer is not None and text:
@@ -91,6 +125,7 @@ class PresidioDetectionEngine:
                         "PHONE_NUMBER",
                         "PIN_CODE",
                         "ADDRESS",
+                        "EMAIL_ADDRESS",
                     ],
                 )
                 candidates.extend(
@@ -110,6 +145,12 @@ class PresidioDetectionEngine:
             EntitySpan(item.entity_type, item.start, item.end, item.score, item.source)
             for item in detect_india_patterns(text)
         )
+        try:
+            from app.nlp.multilingual_pii import detect_multilingual_entities
+
+            candidates.extend(detect_multilingual_entities(text))
+        except Exception:
+            pass
         ner_results, ner_error = self.gliner.detect(text)
         if ner_error:
             self.gliner._load_error = ner_error.removeprefix("GLiNER unavailable: ")
@@ -144,6 +185,9 @@ class PresidioDetectionEngine:
             "VOTER_ID": 7,
             "PASSPORT": 7,
             "PHONE_NUMBER": 7,
+            "EMAIL_ADDRESS": 8,
+            "BANK_ACCOUNT": 7,
+            "DATE_OF_BIRTH": 7,
             "PIN_CODE": 9,
             "PERSON": 6,
             "ADDRESS": 2,

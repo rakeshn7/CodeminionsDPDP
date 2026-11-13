@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import asyncio
 import json
 
+from fastapi import HTTPException
+import pytest
 from fastapi.testclient import TestClient
 
+from app.api.routes import analyze_document_endpoint
 from app.audit.logger import AuditStore
 from app.config import Settings
+from app.extraction.extractor import MAX_FILE_SIZE_BYTES
 from app.detection.india_recognizers import detect_india_patterns
 from app.detection.ner_engine import NERMatch
 from app.llm.base import LLMError, LLMProvider, LLMResult
@@ -121,6 +126,71 @@ def test_empty_input_is_rejected_and_detect_endpoint_accepts_empty(tmp_path):
     assert detected.json()["entities"] == []
 
 
+def test_document_upload_uses_extractor_file_size_limit(tmp_path, monkeypatch):
+    _, gateway, _ = _client(tmp_path)
+    observed = {}
+
+    async def record_upload_size(**kwargs):
+        observed["size"] = len(kwargs["file_bytes"])
+        raise HTTPException(status_code=418, detail="upload reached extraction")
+
+    class FakeUpload:
+        filename = "sample.pdf"
+
+        async def read(self):
+            return b"x" * 1_000_001
+
+    class FakeRequest:
+        headers = {"content-type": "multipart/form-data"}
+
+        async def form(self):
+            return {"file": FakeUpload(), "run_llm": "false"}
+
+    monkeypatch.setattr(gateway, "analyze_file", record_upload_size)
+
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(
+            analyze_document_endpoint(FakeRequest(), gateway)
+        )
+
+    assert exc_info.value.status_code == 418
+    assert observed["size"] == 1_000_001
+    assert observed["size"] < MAX_FILE_SIZE_BYTES
+
+
+def test_document_review_can_be_skipped_then_requested_without_raw_pii(tmp_path):
+    class JsonProvider(StubProvider):
+        async def complete(self, serialized_payload: str) -> LLMResult:
+            self.payloads.append(serialized_payload)
+            return LLMResult(
+                json.dumps({
+                    "summary": "The applicant submitted a loan application.",
+                    "findings": [],
+                }),
+                self.model,
+            )
+
+    provider = JsonProvider()
+    client, _, _ = _client(tmp_path, provider)
+    text = "Asha submitted a loan application."
+
+    extracted = client.post(
+        "/api/documents/analyze",
+        json={"text": text, "filename": "application.txt", "run_llm": False},
+    )
+    assert extracted.status_code == 200
+    assert extracted.json()["llm_analysis"]["status"] == "skipped"
+    assert provider.payloads == []
+
+    reviewed = client.post(
+        "/api/documents/analyze",
+        json={"text": text, "filename": "application.txt", "run_llm": True},
+    )
+    assert reviewed.status_code == 200
+    assert reviewed.json()["llm_analysis"]["status"] == "success"
+    assert "Asha" not in provider.payloads[0]
+
+
 def test_provider_failure_returns_clear_error_and_is_audited(tmp_path):
     provider = StubProvider(fail=True)
     client, gateway, _ = _client(tmp_path, provider)
@@ -155,6 +225,8 @@ def test_groq_provider_builds_model_request_without_network(monkeypatch):
     captured = {}
 
     class FakeResponse:
+        status_code = 200
+
         def raise_for_status(self):
             return None
 
@@ -220,6 +292,146 @@ def test_groq_provider_reports_missing_key_by_environment_variable_name():
         assert str(exc) == "GROQ_API_KEY is not configured."
     else:
         raise AssertionError("Expected missing Groq API key to fail")
+
+
+def test_groq_provider_logs_safe_http_failure_diagnostics(monkeypatch, caplog):
+    import asyncio
+
+    import httpx
+
+    secret = "gsk_sensitive_test_value"
+    personal_data = "Fictional Person"
+    provider = GroqProvider(Settings(groq_api_key=secret))
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            request = httpx.Request("POST", url)
+            response = httpx.Response(
+                401,
+                request=request,
+                text=f"Rejected {secret} while processing {personal_data}",
+            )
+            response.raise_for_status()
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+
+    try:
+        asyncio.run(provider.complete("{}"))
+    except LLMError as exc:
+        assert str(exc) == "provider returned HTTP 401"
+    else:
+        raise AssertionError("Expected an HTTP provider failure")
+
+    assert "HTTPStatusError" in caplog.text
+    assert "provider returned HTTP 401" in caplog.text
+    assert secret not in caplog.text
+    assert personal_data not in caplog.text
+
+
+def test_groq_provider_logs_only_allowlisted_http_400_details(monkeypatch, caplog):
+    import asyncio
+
+    import httpx
+
+    secret = "gsk_sensitive_test_value"
+    personal_data = "Fictional Person"
+    provider = GroqProvider(Settings(groq_api_key=secret))
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            request = httpx.Request("POST", url)
+            response = httpx.Response(
+                400,
+                request=request,
+                json={
+                    "error": {
+                        "type": "invalid_request_error",
+                        "code": "unsupported_value",
+                        "param": "temperature",
+                        "message": f"Rejected {secret} while processing {personal_data}",
+                    }
+                },
+            )
+            response.raise_for_status()
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+
+    try:
+        asyncio.run(provider.complete("{}"))
+    except LLMError as exc:
+        assert str(exc) == "provider returned HTTP 400"
+    else:
+        raise AssertionError("Expected an HTTP provider failure")
+
+    assert "code=unsupported_value" in caplog.text
+    assert "param=temperature" in caplog.text
+    assert "type=invalid_request_error" in caplog.text
+    assert secret not in caplog.text
+    assert personal_data not in caplog.text
+
+
+def test_groq_provider_retries_json_validation_error_once(monkeypatch, caplog):
+    import asyncio
+
+    import httpx
+
+    provider = GroqProvider(Settings(groq_api_key="test-key-never-sent"))
+    calls = 0
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def post(self, url, content, headers):
+            nonlocal calls
+            calls += 1
+            request = httpx.Request("POST", url)
+            if calls == 1:
+                return httpx.Response(
+                    400,
+                    request=request,
+                    json={"error": {"code": "json_validate_failed"}},
+                )
+            return httpx.Response(
+                200,
+                request=request,
+                json={
+                    "model": provider.model,
+                    "choices": [{"message": {"content": "Review completed."}}],
+                },
+            )
+
+    monkeypatch.setattr("app.llm.provider.httpx.AsyncClient", FakeAsyncClient)
+
+    result = asyncio.run(provider.complete('{"messages":[]}'))
+
+    assert calls == 2
+    assert result.text == "Review completed."
+    assert "retrying the sanitized request once" in caplog.text
 
 
 def test_large_input_limit_is_enforced(tmp_path):

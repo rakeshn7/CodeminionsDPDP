@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.detection.presidio_engine import EntitySpan
+from app.privacy.outbound_guard import find_value_spans
 
 
 class TokenManager:
@@ -32,11 +33,35 @@ class TokenManager:
             previous_end = entity.end
 
         replacements = []
+        pii_sources: dict[tuple[str, str], tuple[EntitySpan, str]] = {}
         for entity in ordered:
             value = text[entity.start : entity.end]
             token = self.token_for(entity.entity_type, value)
             replacements.append((entity, token))
+            pii_sources.setdefault((entity.entity_type, value), (entity, value))
 
+        occupied = [(entity.start, entity.end) for entity, _ in replacements]
+        for source_entity, value in pii_sources.values():
+            for start, end in find_value_spans(text, value):
+                if any(start < current_end and current_start < end for current_start, current_end in occupied):
+                    continue
+                matched_value = text[start:end]
+                repeated_entity = EntitySpan(
+                    source_entity.entity_type,
+                    start,
+                    end,
+                    source_entity.score,
+                    "repeat_pii_mask",
+                )
+                replacements.append(
+                    (
+                        repeated_entity,
+                        self.token_for(source_entity.entity_type, matched_value),
+                    )
+                )
+                occupied.append((start, end))
+
+        replacements.sort(key=lambda item: (item[0].start, item[0].end))
         anonymized = self._presidio_anonymize(text, replacements)
         if anonymized is None:
             anonymized = text
